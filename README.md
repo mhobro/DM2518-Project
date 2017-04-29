@@ -12,6 +12,10 @@ First install the following things.
 (yo might not be needed, since the project is already
 generated, but yeoman can still be used to generate angular components)
 
+Run this to install all the dependencies of the project.
+
+	npm install
+
 Cordova plugins that might be missing:
 
 	cordova plugin add cordova-plugin-ionic-keyboard
@@ -22,8 +26,15 @@ Cordova plugins that might be missing:
 
 Run the commands if needed (in the directory of the project).
 
-Run this to start a local dev server with live reload.
+Run this to start a local dev server with live reload (for quick testing in your browser).
 
 	grunt serve 
 
 Please add to this if something is missing.
+
+Some links to useful sources:
+
+https://github.com/diegonetto/generator-ionic
+http://yeoman.io/learning/
+
+
