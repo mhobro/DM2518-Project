@@ -5,18 +5,25 @@ First install the following things.
 
 	npm install -g cordova
 	npm install -g ionic
-	npm install -g bower
-	npm install -g grunt
-	npm install -g yo 
-
-(yo might not be needed, since the project is already
-generated, but yeoman can still be used to generate angular components)
+	npm install -g typescript
 
 Run this to install all the dependencies of the project.
 
 	npm install
 
-Cordova plugins that might be missing:
+
+Commands to run the app:
+
+	ionic server (to run it in the browser)
+
+	ionic serve -l (runs it with options for all platforms)
+
+Use this page for reference:
+
+https://scotch.io/tutorials/build-a-mobile-app-with-angular-2-and-ionic-2
+
+(
+Cordova plugins that might be useful:
 
 	cordova plugin add cordova-plugin-ionic-keyboard
 	cordova plugin add cordova-plugin-console
@@ -25,16 +32,4 @@ Cordova plugins that might be missing:
 	cordova plugin add cordova-plugin-splashscreen
 
 Run the commands if needed (in the directory of the project).
-
-Run this to start a local dev server with live reload (for quick testing in your browser).
-
-	grunt serve 
-
-Please add to this if something is missing.
-
-Some links to useful sources:
-
-https://github.com/diegonetto/generator-ionic
-http://yeoman.io/learning/
-
-
+)
