@@ -22,7 +22,8 @@ Use this page for reference:
 
 https://scotch.io/tutorials/build-a-mobile-app-with-angular-2-and-ionic-2
 
-(
+This part is old, probablt not needed:
+
 Cordova plugins that might be useful:
 
 	cordova plugin add cordova-plugin-ionic-keyboard
@@ -32,4 +33,4 @@ Cordova plugins that might be useful:
 	cordova plugin add cordova-plugin-splashscreen
 
 Run the commands if needed (in the directory of the project).
-)
+
