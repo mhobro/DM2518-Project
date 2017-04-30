@@ -11,10 +11,9 @@ Run this to install all the dependencies of the project.
 
 	npm install
 
-
 Commands to run the app:
 
-	ionic server (to run it in the browser)
+	ionic serve (to run it in the browser)
 
 	ionic serve -l (runs it with options for all platforms)
 
