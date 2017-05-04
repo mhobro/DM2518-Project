@@ -11,7 +11,7 @@ export class HomePage {
   constructor(public navCtrl: NavController) {
     if (!this.isLoggedin()) {
       console.log('You are not logged in');
-      this.navCtrl.push(LoginPage);
+      //this.navCtrl.push(LoginPage);
     }
   }
 
@@ -20,5 +20,4 @@ export class HomePage {
       return true;
     }
   }
-
 }

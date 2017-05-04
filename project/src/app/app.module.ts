@@ -1,11 +1,12 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { MyApp } from './app.component';
 
 import {AngularFireModule} from 'angularfire2';
+import {AngularFireAuthModule} from 'angularfire2/auth';
+import {AuthService} from '../providers/authentication.service';
 
-
+import { MyApp } from './app.component';
 import { AboutPage } from '../pages/about/about';
 import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
@@ -16,9 +17,8 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 
-
 // Initialize Firebase
-const config = {
+const firebase_config = {
     apiKey: "AIzaSyByAfaZFGNWCdgT30WegtVIBAwfrjzAi0c",
     authDomain: "dm2518-project-9da4c.firebaseapp.com",
     databaseURL: "https://dm2518-project-9da4c.firebaseio.com",
@@ -40,7 +40,8 @@ const config = {
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
-    AngularFireModule.initializeApp(config)
+    AngularFireModule.initializeApp(firebase_config),
+    AngularFireAuthModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -52,6 +53,7 @@ const config = {
     LoginPage
   ],
   providers: [
+    AuthService,
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler}

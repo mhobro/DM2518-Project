@@ -1,14 +1,28 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>login</ion-title>
+    <ion-title>Login</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
-  <ion-input type="text" name="email" [(ngModel)]="email" placeholder="email"></ion-input>
-  <ion-input type="password" name="password" [(ngModel)]="password" placeholder="password"></ion-input>
-  <button ion-button round block (click)="login()">Login</button>
+  <ion-list>
+    <form [formGroup]="loginForm" (ngSubmit)="loginEmailPassword()">
+      <ion-item>
+        <ion-label color="primary" floating>Email</ion-label>
+        <ion-input type="text" name="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" floating>Password</ion-label>
+        <ion-input type="password" name="password"  formControlName="password"></ion-input>
+      </ion-item>
+
+      <button ion-button round block type="submit" [disabled]="!loginForm.valid" >Sign In</button>
+    </form>
+  </ion-list>
+
+  <button ion-button round block (click)="loginGoogle()">Sign In with Google</button>
 </ion-content>

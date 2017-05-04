@@ -1,44 +1,59 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
-import { AuthProviders, AuthMethods, AngularFire } from 'angularfire2';
+import {Component} from '@angular/core';
+import {Validators, FormBuilder, FormGroup} from '@angular/forms';
+import { AlertController } from 'ionic-angular';
+
+import {AuthService} from '../../providers/authentication.service';
+
 
 /*
-  Generated class for the Login page.
+ Generated class for the Login page.
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+ See http://ionicframework.com/docs/v2/components/#navigation for more info on
+ Ionic pages and navigation.
+ */
 @Component({
   selector: 'page-login',
   templateUrl: 'login.html'
 })
 export class LoginPage {
-  email: any;
-  password: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public angfire: AngularFire) {}
+  loginForm: FormGroup;
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad LoginPage');
+  constructor(public _auth: AuthService, private formBuilder: FormBuilder, public alertCtrl: AlertController) {
+    this.loginForm = this.formBuilder.group({
+      email: ['', Validators.required],
+      password: ['', Validators.required],
+    });
   }
 
-  login() {
-    this.angfire.auth.login({
-      email: this.email,
-      password: this.password
-    },
-      {
-        provider: AuthProviders.Password,
-        method: AuthMethods.Password
-      }).then((response) => {
-        console.log('Login success' + JSON.stringify(response));
-        let currentuser = {
-          email: response.auth.email,
-          picture: response.auth.photoURL
-        };
-        window.localStorage.setItem('currentuser', JSON.stringify(currentuser));
-        this.navCtrl.pop();
-      }).catch((error) => {
-        console.log(error);
-    })
+  loginGoogle(): void {
+    console.log(typeof this._auth);
+    this._auth.loginGoogle();
+  }
+
+  loginEmailPassword(): void {
+    this._auth.loginEmailPassword(this.loginForm.value.email, this.loginForm.value.password).catch((error) => {
+      console.log(error);
+
+      // Display an alert that explains the error
+      let alert = this.alertCtrl.create({
+        title: 'Login error',
+        subTitle: error.message,
+        buttons: ['OK']
+      });
+      alert.present();
+    });
+
+   // Check if connected (debug)
+    // Display an alert that explains the error
+
+    if (this._auth.authenticated) {
+      let alert = this.alertCtrl.create({
+        title: 'Connection successful',
+        subTitle: "User " + this._auth.getName() + " connected",
+        buttons: ['OK']
+      });
+      alert.present();
+    }
+
   }
 }
