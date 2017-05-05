@@ -17,8 +17,8 @@ export class AuthService {
     });
   }
 
-  public loginGoogle() {
-    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  public loginGoogle() : firebase.Promise<firebase.User> {
+    return this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
   }
 
   public loginEmailPassword(email, password): firebase.Promise<firebase.User> {
@@ -26,7 +26,12 @@ export class AuthService {
   }
 
   public logout() {
-    this.afAuth.auth.signOut();
+    this.afAuth.auth.signOut().then(function() {
+        console.log("Logged out succesfully");
+        console.log(this.currentUser.displayName);
+    }).catch(function(error) {
+      console.log(error);
+    });
   }
 
   get authenticated(): boolean {
@@ -35,7 +40,7 @@ export class AuthService {
 
   public getName(): string {
     if (this.currentUser !== null) {
-      return this.currentUser.email;
+      return this.currentUser.displayName;
     } else {
       return '';
     }
