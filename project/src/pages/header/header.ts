@@ -1,5 +1,5 @@
-import {Component, Input, ViewChild, OnInit} from '@angular/core';
-import {NavController, Nav} from 'ionic-angular';
+import {Component, Input, OnInit} from '@angular/core';
+import {NavController} from 'ionic-angular';
 
 import {LoginPage} from '../login/login';
 

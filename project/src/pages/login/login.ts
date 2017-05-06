@@ -42,6 +42,8 @@ export class LoginPage {
   private handleConnection(result: firebase.Promise<firebase.User>): void {
     // Handle connection errors
     result.catch((error) => {
+      console.log(error);
+
       var errorCode = error['code'];
 
       if (errorCode === 'auth/invalid-email' ||
