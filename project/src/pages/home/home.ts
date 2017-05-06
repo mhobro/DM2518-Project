@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-import { LoginPage } from '../login/login';
+import {Component} from '@angular/core';
+import {NavController} from 'ionic-angular';
+
+import {AuthService} from '../../providers/authentication.service';
 
 @Component({
   selector: 'page-home',
@@ -9,18 +10,7 @@ import { LoginPage } from '../login/login';
 export class HomePage {
   header_data: any;
 
-  constructor(public navCtrl: NavController) {
-    if (!this.isLoggedin()) {
-      console.log('You are not logged in');
-      //this.navCtrl.push(LoginPage);
-    }
-
+  constructor(public navCtrl: NavController, public _auth: AuthService) {
     this.header_data = {titlePage: "Home", isMenu: true};
-  }
-
-  isLoggedin() {
-    if (window.localStorage.getItem('currentuser')) {
-      return true;
-    }
   }
 }

@@ -9,6 +9,6 @@ export class ContactPage {
   header_data: any;
 
   constructor(public navCtrl: NavController) {
-    this.header_data = {titlePage: "About", isMenu: true};
+    this.header_data = {titlePage: "Contact", isMenu: true};
   }
 }

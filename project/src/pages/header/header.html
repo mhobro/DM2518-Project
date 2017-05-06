@@ -1,6 +1,14 @@
 <ion-navbar>
-  <button *ngIf="header_data.isMenu" ion-button icon-only menuToggle>
-    <ion-icon name="menu"></ion-icon>
-  </button>
+  <ion-buttons left>
+    <button *ngIf="isAuthenticated()" ion-button icon-only menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+  </ion-buttons>
+
   <ion-title>{{header_data.titlePage}}</ion-title>
+
+  <ion-buttons end>
+    <button ion-button round (click)="logIn()" *ngIf="!(currentComponent === 'LoginPage') && !isAuthenticated()">Login</button>
+    <button ion-button round (click)="logOut()" *ngIf="isAuthenticated()">Logout</button>
+  </ion-buttons>
 </ion-navbar>

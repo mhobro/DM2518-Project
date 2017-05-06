@@ -28,7 +28,6 @@ export class MyApp {
     // set our app's pages
     this.pages = [
       {title: 'Home', component: HomePage},
-      {title: 'Login', component: LoginPage},
       {title: 'Contact', component: ContactPage},
       {title: 'About', component: AboutPage},
     ];
@@ -40,6 +39,7 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
+      this.nav.setRoot(this.rootPage);
     });
   }
 

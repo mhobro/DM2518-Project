@@ -1,18 +1,45 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ViewChild, OnInit} from '@angular/core';
+import {NavController, Nav} from 'ionic-angular';
 
-import {HomePage} from '../home/home';
+import {LoginPage} from '../login/login';
+
+import {AuthService} from '../../providers/authentication.service';
+import {HomePage} from "../home/home";
 
 
 @Component({
   selector: 'custom-header',
   templateUrl: 'header.html',
 })
-export class Header {
-
-  //header_data: { title: string, isMenu: boolean };
+export class Header implements OnInit {
   header_data: any;
+  currentComponent: string = '';
 
-  constructor() {}
+  constructor(public navCtrl: NavController, public _auth: AuthService) {}
+
+  ngOnInit(): void {
+    if (typeof this.navCtrl.getActive() != 'undefined') {
+      //console.log("active " + this.navCtrl.getActive().name);
+      this.currentComponent = this.navCtrl.getActive().name;
+    }
+  }
+
+  logIn(): void {
+    this.navCtrl.push(LoginPage);
+  }
+
+  logOut(): void {
+    this._auth.logout();
+    this.navCtrl.setRoot(HomePage);
+  }
+
+  isAuthenticated(): boolean {
+    return this._auth.authenticated;
+  }
+
+  get username(): string {
+    return this._auth.getName();
+  }
 
   @Input()
   set header(header_data: any) {
