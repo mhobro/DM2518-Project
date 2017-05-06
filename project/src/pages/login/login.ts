@@ -17,12 +17,15 @@ import {AuthService} from '../../providers/authentication.service';
 })
 export class LoginPage {
   loginForm: FormGroup;
+  header_data: any;
 
   constructor(public _auth: AuthService, private formBuilder: FormBuilder, public alertCtrl: AlertController) {
     this.loginForm = this.formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.required],
     });
+
+    this.header_data={titlePage: 'Login', isMenu: true};
   }
 
   loginGoogle(): void {

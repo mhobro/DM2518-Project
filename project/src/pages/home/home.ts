@@ -7,12 +7,15 @@ import { LoginPage } from '../login/login';
   templateUrl: 'home.html'
 })
 export class HomePage {
+  header_data: any;
 
   constructor(public navCtrl: NavController) {
     if (!this.isLoggedin()) {
       console.log('You are not logged in');
       //this.navCtrl.push(LoginPage);
     }
+
+    this.header_data = {titlePage: "Home", isMenu: true};
   }
 
   isLoggedin() {

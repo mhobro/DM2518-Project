@@ -6,9 +6,10 @@ import { NavController } from 'ionic-angular';
   templateUrl: 'about.html'
 })
 export class AboutPage {
+  header_data: any;
 
   constructor(public navCtrl: NavController) {
-
+    this.header_data = {titlePage: "About", isMenu: true};
   }
 
 }

@@ -1,13 +1,8 @@
 <ion-header>
-
-  <ion-navbar>
-    <ion-title>Login</ion-title>
-  </ion-navbar>
-
+  <custom-header [header]="header_data"></custom-header>
 </ion-header>
 
-
-<ion-content padding>
+<ion-content class=”has-header” padding>
   <ion-list>
     <form [formGroup]="loginForm" (ngSubmit)="loginEmailPassword()">
       <ion-item>
@@ -17,10 +12,10 @@
 
       <ion-item>
         <ion-label color="primary" floating>Password</ion-label>
-        <ion-input type="password" name="password"  formControlName="password"></ion-input>
+        <ion-input type="password" name="password" formControlName="password"></ion-input>
       </ion-item>
 
-      <button ion-button round block type="submit" [disabled]="!loginForm.valid" >Sign In</button>
+      <button ion-button round block type="submit" [disabled]="!loginForm.valid">Sign In</button>
     </form>
   </ion-list>
 

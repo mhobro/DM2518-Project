@@ -1,12 +1,15 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { RouterModule }   from '@angular/router';
 
 import {AngularFireModule} from 'angularfire2';
 import {AngularFireAuthModule} from 'angularfire2/auth';
 import {AuthService} from '../providers/authentication.service';
+import {HeaderModule} from '../pages/header/header.module';
 
 import { MyApp } from './app.component';
+import { Header } from '../pages/header/header';
 import { AboutPage } from '../pages/about/about';
 import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
@@ -38,6 +41,7 @@ const firebase_config = {
     LoginPage
   ],
   imports: [
+    HeaderModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(firebase_config),
@@ -46,6 +50,7 @@ const firebase_config = {
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
+    Header,
     AboutPage,
     ContactPage,
     HomePage,
