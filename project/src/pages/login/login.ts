@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Validators, FormBuilder, FormGroup} from '@angular/forms';
 import {AlertController, NavController} from 'ionic-angular';
 
+import {AngularFireDatabase} from 'angularfire2/database';
 import {AuthService} from '../../providers/authentication.service';
 
 // Do not import from 'firebase' as you'll lose the tree shaking benefits
@@ -22,7 +23,11 @@ export class LoginPage {
   loginForm: FormGroup;
   header_data: any;
 
-  constructor(public navCtrl: NavController, public _auth: AuthService, private formBuilder: FormBuilder, public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController,
+              public _auth: AuthService,
+              private formBuilder: FormBuilder,
+              public alertCtrl: AlertController,
+              public db: AngularFireDatabase) {
     this.loginForm = this.formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.required],
@@ -42,7 +47,7 @@ export class LoginPage {
   private handleConnection(result: firebase.Promise<firebase.User>): void {
     // Handle connection errors
     result.catch((error) => {
-      console.log(error);
+      //console.log(error);
 
       var errorCode = error['code'];
 
@@ -60,9 +65,32 @@ export class LoginPage {
         alert.present();
       }
     }).then((userResult) => {
-      // Check if connected (debug)
+      // Check if connected and user in db
       if (userResult != null) {
-        console.log("Logged in successfully");
+        var user:firebase.User;
+
+        if (typeof userResult.user !== 'undefined') {
+          // if google authentication
+          user = userResult.user;
+        } else {
+          // if email/pass authentication
+          user = userResult;
+        }
+
+        //console.log(user);
+
+        // Add the user in the database
+        var ref = firebase.database().ref("users/" + user.uid);
+        ref.once("value")
+          .then(function(snapshot) {
+            if (!snapshot.exists()) {
+              ref.child('name').set(user.displayName);
+              ref.child('email').set(user.email);
+            }
+          });
+
+        //console.log("Logged in successfully");
+
         // Go back to HomePage
         this.navCtrl.popToRoot();
       }

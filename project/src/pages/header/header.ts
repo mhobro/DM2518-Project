@@ -37,10 +37,6 @@ export class Header implements OnInit {
     return this._auth.authenticated;
   }
 
-  get username(): string {
-    return this._auth.getName();
-  }
-
   @Input()
   set header(header_data: any) {
     this.header_data = header_data;

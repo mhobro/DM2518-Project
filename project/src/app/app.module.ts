@@ -4,6 +4,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 
 import {AngularFireModule} from 'angularfire2';
 import {AngularFireAuthModule} from 'angularfire2/auth';
+import {AngularFireDatabaseProvider} from 'angularfire2/database';
 import {AuthService} from '../providers/authentication.service';
 
 import { MyApp } from './app.component';
@@ -16,6 +17,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import {GooglePlus} from '@ionic-native/google-plus';
 import {GoogleMaps} from '@ionic-native/google-maps';
+import { Geolocation } from '@ionic-native/geolocation';
 
 // Initialize Firebase
 const firebase_config = {
@@ -51,7 +53,9 @@ const firebase_config = {
     LoginPage
   ],
   providers: [
+    AngularFireDatabaseProvider,
     GoogleMaps,
+    Geolocation,
     GooglePlus,
     AuthService,
     StatusBar,

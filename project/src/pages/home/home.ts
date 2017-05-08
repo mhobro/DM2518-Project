@@ -13,4 +13,13 @@ export class HomePage{
   constructor(public navCtrl: NavController, public _auth: AuthService) {
     this.header_data = {titlePage: "Home", isMenu: true};
   }
+
+  get username(): string {
+    let user = this._auth.getUser;
+    if (user !== null) {
+      return user.email;
+    } else {
+      return '';
+    }
+  }
 }

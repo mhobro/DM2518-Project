@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, ɵStrictNullChecksNotSupported} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {AngularFireAuth} from 'angularfire2/auth';
 import {Platform} from 'ionic-angular';
@@ -11,7 +11,7 @@ import * as firebase from 'firebase/app';
 @Injectable()
 export class AuthService {
   private authState: Observable<firebase.User>;
-  private currentUser: firebase.User;
+  private currentUser: firebase.User = null;
 
   constructor(public afAuth: AngularFireAuth, private platform: Platform, private google: GooglePlus) {
     this.authState = afAuth.authState;
@@ -51,12 +51,7 @@ export class AuthService {
     return this.currentUser !== null;
   }
 
-  public getName(): string {
-    if (this.currentUser !== null) {
-      return this.currentUser.email;
-      //return this.currentUser.displayName;
-    } else {
-      return '';
-    }
+  get getUser(): firebase.User | null {
+    return this.currentUser;
   }
 }
