@@ -5,20 +5,17 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import {AngularFireModule} from 'angularfire2';
 import {AngularFireAuthModule} from 'angularfire2/auth';
 import {AuthService} from '../providers/authentication.service';
-import {HeaderModule} from '../pages/header/header.module';
 
 import { MyApp } from './app.component';
 import { Header } from '../pages/header/header';
-import { AboutPage } from '../pages/about/about';
-import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
-import { TabsPage } from '../pages/tabs/tabs';
+import { MapPage } from '../pages/map/map';
 import { LoginPage } from '../pages/login/login';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import {GooglePlus} from '@ionic-native/google-plus';
-
+import {GoogleMaps} from '@ionic-native/google-maps';
 
 // Initialize Firebase
 const firebase_config = {
@@ -34,14 +31,12 @@ const firebase_config = {
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
-    ContactPage,
+    Header,
     HomePage,
-    TabsPage,
+    MapPage,
     LoginPage
   ],
   imports: [
-    HeaderModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(firebase_config),
@@ -51,13 +46,12 @@ const firebase_config = {
   entryComponents: [
     MyApp,
     Header,
-    AboutPage,
-    ContactPage,
     HomePage,
-    TabsPage,
+    MapPage,
     LoginPage
   ],
   providers: [
+    GoogleMaps,
     GooglePlus,
     AuthService,
     StatusBar,

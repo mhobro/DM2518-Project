@@ -7,7 +7,7 @@ import {AuthService} from '../../providers/authentication.service';
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-export class HomePage {
+export class HomePage{
   header_data: any;
 
   constructor(public navCtrl: NavController, public _auth: AuthService) {

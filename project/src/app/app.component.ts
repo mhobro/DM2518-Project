@@ -4,8 +4,7 @@ import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 
 import {HomePage} from '../pages/home/home';
-import {ContactPage} from '../pages/contact/contact';
-import {AboutPage} from '../pages/about/about';
+import {MapPage} from '../pages/map/map';
 
 @Component({
   templateUrl: 'app.html',
@@ -27,8 +26,7 @@ export class MyApp {
     // set our app's pages
     this.pages = [
       {title: 'Home', component: HomePage},
-      {title: 'Contact', component: ContactPage},
-      {title: 'About', component: AboutPage},
+      {title: 'Map', component: MapPage}
     ];
   }
 

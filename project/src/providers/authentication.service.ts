@@ -53,7 +53,8 @@ export class AuthService {
 
   public getName(): string {
     if (this.currentUser !== null) {
-      return this.currentUser.displayName;
+      return this.currentUser.email;
+      //return this.currentUser.displayName;
     } else {
       return '';
     }
