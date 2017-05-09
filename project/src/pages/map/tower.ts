@@ -30,8 +30,12 @@ export class Tower {
    * @param pisMap
    */
   public displayAllNearestPis(map, pisMap) {
-    this.piInRange.forEach(function(pi) {
-      pisMap.get(pi).marker.setMap(map);
+    this.piInRange.forEach(function(pi, index, array) {
+      if (!pisMap.has(pi)) {
+        array.splice(index, 1); // Remove the PI if not in the map
+      } else {
+        pisMap.get(pi).marker.setMap(map);
+      }
     })
   }
 
@@ -42,8 +46,12 @@ export class Tower {
    * @param pisMap
    */
   public hideAllNearestPis(pisMap) {
-    this.piInRange.forEach(function(pi) {
-      pisMap.get(pi).marker.setMap(null);
+    this.piInRange.forEach(function(pi, index, array) {
+      if (!pisMap.has(pi)) {
+        array.splice(index, 1); // Remove the PI if not in the map
+      } else {
+        pisMap.get(pi).marker.setMap(null);
+      }
     })
   }
 }

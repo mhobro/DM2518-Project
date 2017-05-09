@@ -89,6 +89,10 @@ export class MapPage {
     return marker;
   }
 
+  private hideMarker(marker) {
+    marker.setMap(null);
+  }
+
   /*************************************************
    *********************** PI **********************
    *************************************************/
@@ -135,6 +139,17 @@ export class MapPage {
       // Add the PI in the map of PIs
       var newPI = new Pi(name, description, new google.maps.LatLng(lat, lng), marker, unlocked, type, owner);
       this.pis.set(key, newPI);
+    });
+
+
+    // Handler triggered every time a PI is removed from the db
+    piRef.on('child_removed', (oldChildSnapshot) => {
+      let key = oldChildSnapshot.key;
+      // Remove the PI from the map and the map of PIs
+      if (this.pis.has(key)) {
+        this.hideMarker(this.pis.get(key).marker);
+        this.pis.delete(key);
+      }
     });
   }
 
@@ -293,6 +308,16 @@ export class MapPage {
         // Display the tower on the map
         tower.marker.setMap(this.map);
       });
+    });
+
+    // Handler triggered every time a tower is removed from the db
+    towersRef.on('child_removed', (oldChildSnapshot) => {
+      let key = oldChildSnapshot.key;
+      // Remove the Tower from the map and the map of Towers
+      if (this.towers.has(key)) {
+        this.hideMarker(this.towers.get(key).marker);
+        this.towers.delete(key);
+      }
     });
   }
 
