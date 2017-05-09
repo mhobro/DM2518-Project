@@ -4,4 +4,22 @@
 
 <ion-content>
   <div #map id="map"></div>
+
+  <!-- The left overlay -->
+  <div #menuLeft id="menuLeft" class="overlay left">
+    <a class="closebtn right" (click)="closeLeftMenu()" >&times;</a>
+    <!-- Overlay content -->
+    <div class="overlay-content">
+      <a href="#">Link</a>
+    </div>
+  </div>
+
+  <!-- The right overlay -->
+  <div #menuRight id="menuRight" class="overlay right">
+    <a class="closebtn left" (click)="closeRightMenu()" >&times;</a>
+    <!-- Overlay content -->
+    <div class="overlay-content">
+      <a href="#">Link</a>
+    </div>
+  </div>
 </ion-content>
