@@ -25,6 +25,8 @@ export class MapPage {
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
 
+  infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
+
   constructor(public navCtrl: NavController,
               public db: AngularFireDatabase,
               public geolocation: Geolocation,
@@ -93,6 +95,12 @@ export class MapPage {
     marker.setMap(null);
   }
 
+  private displayInfoWindowOnMarker(marker, content) {
+    this.infoWindow.close();
+    this.infoWindow.setContent(content);
+    this.infoWindow.open(this.map, marker);
+  }
+
   /*************************************************
    *********************** PI **********************
    *************************************************/
@@ -132,12 +140,14 @@ export class MapPage {
               marker.setMap(this.map);
             }
             //console.log("PI " + key + " near tower " + keyTower + "[" + (tower.activated ? "activated" : "not activated") + "]");
+            //console.log("PI " + key + "[" + (unlocked ? "unlocked" : "locked") + "]");
           }
         });
       }
 
       // Add the PI in the map of PIs
-      var newPI = new Pi(name, description, new google.maps.LatLng(lat, lng), marker, unlocked, type, owner);
+      var newPI = new Pi(key, name, description,
+        new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map);
       this.pis.set(key, newPI);
     });
 
@@ -147,9 +157,14 @@ export class MapPage {
       let key = oldChildSnapshot.key;
       // Remove the PI from the map and the map of PIs
       if (this.pis.has(key)) {
-        this.hideMarker(this.pis.get(key).marker);
+        let pi = this.pis.get(key);
+        this.hideMarker(pi.marker);
+        //pi.marker.removeEventListener('click', pi.onclickListener);
         this.pis.delete(key);
       }
+
+      let userRef = this.db.database.ref('users/' + oldChildSnapshot.val().owner);
+      userRef.child('pis/'+key).remove();
     });
   }
 
@@ -281,7 +296,7 @@ export class MapPage {
       let lng = towerSnapshot.child('lng').val();
 
       let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
-      var tower = new Tower(name, new google.maps.LatLng(lat, lng), marker);
+      var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker, undefined, this.infoWindow, this.map);
 
       // Add the tower to the map of markers
       this.towers.set(key, tower);
@@ -364,9 +379,7 @@ export class MapPage {
       });
 
       userLocationMarker.addListener('click', () => {
-        new google.maps.InfoWindow({
-          content: "Your location.",
-        }).open(this.map, userLocationMarker);
+          this.displayInfoWindowOnMarker(userLocationMarker, "Your location");
       });
 
 

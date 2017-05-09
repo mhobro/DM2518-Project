@@ -17,6 +17,7 @@ export class AuthService {
     this.authState = afAuth.authState;
     this.authState.subscribe((user: firebase.User) => {
       this.currentUser = user;
+      // TODO : set Root home => redirect the user to home if logout
     });
   }
 
