@@ -3,8 +3,12 @@ import {NavController, AlertController} from 'ionic-angular';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {Geolocation} from '@ionic-native/geolocation';
 
+import * as map_style from './map_style'; // File containin all the style for the map
+import Utils from './utils'; // File containing all the utils functions
+
 import {Tower} from './tower';
 import {Pi} from './pi';
+import {Control_Map} from './map_control';
 
 import {AuthService} from '../../providers/authentication.service';
 
@@ -53,7 +57,7 @@ export class MapPage {
       zoom: 11,
       minZoom: 11,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      styles: map_style,
+      styles: map_style.mapstyle,
       mapTypeControl: false
     }
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
@@ -85,7 +89,7 @@ export class MapPage {
     let marker = new google.maps.Marker({
       position: {lat: lat, lng: lng},
       map: (displayed ? this.map : null),
-      icon: icons[type].icon,
+      icon: map_style.icons[type].icon,
       animation: google.maps.Animation.DROP
     });
     return marker;
@@ -164,7 +168,7 @@ export class MapPage {
       }
 
       let userRef = this.db.database.ref('users/' + oldChildSnapshot.val().owner);
-      userRef.child('pis/'+key).remove();
+      userRef.child('pis/' + key).remove();
     });
   }
 
@@ -204,7 +208,7 @@ export class MapPage {
     control.controlDiv.style.clear = 'both';
     control.controlUI.style.cssFloat = 'left';
 
-    var cancelControl = createMapControlButton('Cancel');
+    var cancelControl = Utils.createMapControlButton('Cancel');
     var cancelControlUI = cancelControl.controlUI;
     cancelControlUI.style.cssFloat = 'left';
     cancelControlUI.style.marginLeft = '12px';
@@ -310,13 +314,13 @@ export class MapPage {
 
         // Change the icon according to the state (lock/unlocked)
         if (activated) {
-          tower.marker.setIcon(icons['tower_unlocked'].icon);
+          tower.marker.setIcon(map_style.icons['tower_unlocked'].icon);
           // Display all the PIs near the tower
           tower.displayAllNearestPis(this.map, this.pis);
 
         } else {
           // Hide all the PIs near the tower
-          tower.marker.setIcon(icons['tower_locked'].icon);
+          tower.marker.setIcon(map_style.icons['tower_locked'].icon);
           tower.hideAllNearestPis(this.pis);
         }
 
@@ -375,11 +379,11 @@ export class MapPage {
     if (navigator.geolocation) {
       var userLocationMarker = new google.maps.Marker({
         map: this.map,
-        icon: icons['user_location'].icon
+        icon: map_style.icons['user_location'].icon
       });
 
       userLocationMarker.addListener('click', () => {
-          this.displayInfoWindowOnMarker(userLocationMarker, "Your location");
+        this.displayInfoWindowOnMarker(userLocationMarker, "Your location");
       });
 
 
@@ -403,178 +407,3 @@ export class MapPage {
     }
   }
 }
-
-/*************************************************
- ****************** MAP CONTROL ******************
- *************************************************/
-/*
- Correspond to a custom control (= button) on the map
- */
-export class Control_Map {
-  public controlDiv: any;
-  public controlUI: any;
-  public controlText: any;
-  public action: any;
-
-  constructor(text: any, action: any) {
-    this.controlDiv = document.createElement('div');
-    var newControl = createMapControlButton(text);
-    this.controlUI = newControl.controlUI;
-    this.controlText = newControl.controlText;
-    this.controlDiv.appendChild(newControl.controlUI);
-
-    // Setup the click event listeners.
-    this.controlUI.addEventListener('click', () => {
-      action(this);
-    });
-  }
-
-  public change_action(newAction, newText) {
-    this.controlUI.removeEventListener('click', this.action);
-    this.controlText.innerHTML = newText;
-    this.controlUI.addEventListener('click', newAction);
-  }
-}
-
-/*
- Create a button to display on the map
- */
-function createMapControlButton(buttonText) {
-  // Set CSS for the control border.
-  var controlUI = document.createElement('button');
-  controlUI.style.backgroundColor = '#fff';
-  controlUI.style.border = '2px solid #fff';
-  controlUI.style.borderRadius = '3px';
-  controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-  controlUI.style.cursor = 'pointer';
-  controlUI.style.marginBottom = '22px';
-  controlUI.style.textAlign = 'center';
-
-  // Set CSS for the control interior.
-  var controlText = document.createElement('div');
-  controlText.style.color = 'rgb(25,25,25)';
-  controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-  controlText.style.fontSize = '16px';
-  controlText.style.lineHeight = '38px';
-  controlText.style.paddingLeft = '5px';
-  controlText.style.paddingRight = '5px';
-  controlText.innerHTML = buttonText;
-  controlUI.appendChild(controlText);
-
-  return {controlUI, controlText};
-}
-
-
-/*************************************************
- ****************** MAP STYLE ********************
- *************************************************/
-var map_style = [
-  {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
-  {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
-  {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
-  {
-    featureType: 'administrative.locality',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#d59563'}]
-  },
-  {
-    featureType: 'poi',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#d59563'}]
-  },
-  {
-    featureType: 'poi.park',
-    elementType: 'geometry',
-    stylers: [{color: '#263c3f'}]
-  },
-  {
-    featureType: 'poi.park',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#6b9a76'}]
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [{color: '#38414e'}]
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry.stroke',
-    stylers: [{color: '#212a37'}]
-  },
-  {
-    featureType: 'road',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#9ca5b3'}]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'geometry',
-    stylers: [{color: '#746855'}]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'geometry.stroke',
-    stylers: [{color: '#1f2835'}]
-  },
-  {
-    featureType: 'road.highway',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#f3d19c'}]
-  },
-  {
-    featureType: 'transit',
-    elementType: 'geometry',
-    stylers: [{color: '#2f3948'}]
-  },
-  {
-    featureType: 'transit.station',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#d59563'}]
-  },
-  {
-    featureType: 'water',
-    elementType: 'geometry',
-    stylers: [{color: '#17263c'}]
-  },
-  {
-    featureType: 'water',
-    elementType: 'labels.text.fill',
-    stylers: [{color: '#515c6d'}]
-  },
-  {
-    featureType: 'water',
-    elementType: 'labels.text.stroke',
-    stylers: [{color: '#17263c'}]
-  }
-];
-
-var iconBase = 'assets/marker/';
-var icons = {
-  tower_locked: {
-    icon: {
-      url: iconBase + 'tower_red.svg',
-      scaledSize: new google.maps.Size(64, 64)
-    }
-  },
-  tower_unlocked: {
-    icon: {
-      url: iconBase + 'tower_green.svg',
-      scaledSize: new google.maps.Size(64, 64)
-    }
-  },
-  user_pi: {
-    icon: {
-      url: iconBase + 'user_pi.svg'
-    }
-  },
-  user_location: {
-    icon: {
-      url: iconBase + 'point_orange.svg',
-      scaledSize: new google.maps.Size(64, 64)
-    }
-  },
-  default: {
-    icon: null
-  }
-};

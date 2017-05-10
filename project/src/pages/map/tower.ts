@@ -1,3 +1,5 @@
+import Utils from './utils';
+
 /**
  * [Tower] Class representing a Tower on the map
  */
@@ -47,7 +49,7 @@ export class Tower {
    * @returns {boolean}
    */
   public isNear(lat, lng): boolean {
-    return (calcDistance(this.location, new google.maps.LatLng(lat, lng)) <= Tower.MAX_UNLOCK_DST);
+    return (Utils.calcDistance(this.location, new google.maps.LatLng(lat, lng)) <= Tower.MAX_UNLOCK_DST);
   }
 
   /**
@@ -85,9 +87,4 @@ export class Tower {
       }
     })
   }
-}
-
-// calculates distance between two points in km's
-function calcDistance(p1: google.maps.LatLng, p2: google.maps.LatLng): number {
-  return google.maps.geometry.spherical.computeDistanceBetween(p1, p2); // Return the distance in meters
 }
