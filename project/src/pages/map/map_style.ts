@@ -8,13 +8,13 @@ export const icons = {
   tower_locked: {
     icon: {
       url: iconBase + 'tower_red.svg',
-      scaledSize: new google.maps.Size(64, 64)
+      scaledSize: new google.maps.Size(35, 35)
     }
   },
   tower_unlocked: {
     icon: {
       url: iconBase + 'tower_green.svg',
-      scaledSize: new google.maps.Size(64, 64)
+      scaledSize: new google.maps.Size(35, 35)
     }
   },
   user_pi: {

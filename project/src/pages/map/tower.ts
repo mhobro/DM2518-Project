@@ -24,7 +24,8 @@ export class Tower {
               public pis,
               public db: AngularFireDatabase,
               public user_uid: string,
-              public user_locationObs) {
+              public user_locationObs,
+              public marker_cluster) {
 
     // Subscribe to the user's location update
     this.user_locationObs.subscribe((data) => {
@@ -101,8 +102,13 @@ export class Tower {
       unlockButton.disabled = true;
     } else {
       unlockButton.onclick = () => {
-        this.unlockTower();
-        this.infoWindow.close();
+        // Update state in the db
+        this.updateStateInDb(true).then(() => {
+          //this.unlockTower();
+          this.infoWindow.close();
+        }).catch(function (error) {
+          console.log("Remove failed: " + error.message)
+        });
       }
     }
 
@@ -128,17 +134,23 @@ export class Tower {
    * @param map
    * @param pisMap
    */
-  public displayAllNearestPis(map, pisMap) {
-    this.piInRange.forEach(function (pi, index, array) {
+  public displayAllNearestPis(pisMap) {
+    //console.log(this.marker_cluster.getMarkers());
+
+    this.piInRange.forEach((pi, index, array) => {
       if (!pisMap.has(pi)) {
         array.splice(index, 1); // Remove the PI if not in the map
       } else {
         var pi = pisMap.get(pi);
+        console.log(pi);
         pi.marker.setAnimation(google.maps.Animation.DROP);
-        pi.marker.setMap(map);
+        //pi.marker.setMap(map);
+        this.marker_cluster.addMarker(pi.marker, false);
         pi.unlocked = true;
       }
     })
+
+    //console.log(this.marker_cluster.getMarkers());
   }
 
   /**
@@ -148,31 +160,43 @@ export class Tower {
    * @param pisMap
    */
   public hideAllNearestPis(pisMap) {
-    this.piInRange.forEach(function (pi, index, array) {
+    //console.log(this.marker_cluster.getMarkers());
+
+    this.piInRange.forEach((pi, index, array) => {
       if (!pisMap.has(pi)) {
         array.splice(index, 1); // Remove the PI if not in the map
       } else {
         var pi = pisMap.get(pi);
-        pi.marker.setMap(null);
+        console.log(pi);
+        this.marker_cluster.removeMarker(pi.marker, false);
         pi.unlocked = false;
       }
     })
+
+    //console.log(this.marker_cluster.getMarkers());
   }
 
   /**
-   * Unlock the tower by changing the state in the db and updating the map
+   * Unlock the tower by changing the state and updating the map
    */
   public unlockTower() {
-    // Update state in the db
-    this.updateStateInDb(true).then(() => {
-      this.activated = true;
-      // Change the marker icon
-      this.marker.setIcon(map_style.icons['tower_unlocked'].icon);
-      // Display all the PIs near the tower
-      this.displayAllNearestPis(this.map, this.pis);
-    }).catch(function (error) {
-      console.log("Remove failed: " + error.message)
-    });
+    this.activated = true;
+    // Change the marker icon
+    this.marker.setIcon(map_style.icons['tower_unlocked'].icon);
+    // Display all the PIs near the tower
+    this.displayAllNearestPis(this.pis);
+
+  }
+
+  /**
+   * Lock the tower by changing its state and updating the map
+   */
+  public lockTower() {
+    this.activated = false;
+    // Change the marker icon
+    this.marker.setIcon(map_style.icons['tower_locked'].icon);
+    // Display all the PIs near the tower
+    this.hideAllNearestPis(this.pis);
   }
 
   /**
