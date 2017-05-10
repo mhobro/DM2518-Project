@@ -15,7 +15,13 @@ export class Header implements OnInit {
   header_data: any;
   currentComponent: string = '';
 
-  constructor(public navCtrl: NavController, public _auth: AuthService) {}
+  constructor(public navCtrl: NavController, public _auth: AuthService) {
+    this._auth.invokeEvent.subscribe((value) => {
+      if (value['logout']) {
+        this.navCtrl.setRoot(HomePage);
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (typeof this.navCtrl.getActive() != 'undefined') {
@@ -30,7 +36,6 @@ export class Header implements OnInit {
 
   logOut(): void {
     this._auth.logout();
-    this.navCtrl.setRoot(HomePage);
   }
 
   isAuthenticated(): boolean {
