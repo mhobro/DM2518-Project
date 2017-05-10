@@ -19,7 +19,18 @@
     <a class="closebtn left" (click)="closeRightMenu()" >&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
-      <a href="#">Link</a>
+      <a href="#">Filters</a>
+
+      <ion-list>
+
+        <ion-item>
+          <ion-label>Restaurants</ion-label>
+          <ion-toggle [(ngModel)]="restaurant" (ionChange)="notify()"></ion-toggle>
+        </ion-item>
+
+      </ion-list>
+
+      <a href="#">Friends</a>
     </div>
   </div>
 </ion-content>

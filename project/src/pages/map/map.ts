@@ -25,9 +25,12 @@ export class MapPage {
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
+
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
+  public restaurant: boolean;
+  public filters: Map<string, boolean> = new Map();
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
 
@@ -37,6 +40,8 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
+    this.restaurant = true;
+    this.filters.set("restaurant", true);
   }
 
   // Called when the view is fully loaded
@@ -83,10 +88,20 @@ export class MapPage {
   }
 
   /*************************************************
+   ************* FILTERS ***************************
+   *************************************************/
+
+  public notify() {
+    //console.log("TOGGLED" + this.restaurant);
+    this.filters.set("restaurant", this.restaurant);
+    this.loadMap();
+  }
+
+  /*************************************************
    ************* MARKER (PI & Tower) ***************
    *************************************************/
   private createMarker(lat, lng, displayed = true, type = 'default') {
-    let marker = new google.maps.Marker({
+    var marker = new google.maps.Marker({
       position: {lat: lat, lng: lng},
       map: (displayed ? this.map : null),
       icon: map_style.icons[type].icon,
@@ -118,41 +133,48 @@ export class MapPage {
       let data = piSnapshot.val();
       let owner = data.owner;
       let description = ""; // TODO : change when added in the db
-      let type = null; // / TODO : change when added in the db
+      let type = data.type;
       let lat = data.lat;
       let lng = data.lng;
       let unlocked = false;
       let marker = null;
 
-      // if a PI added by the authenticated user
-      if (owner == this.aut.getUser.uid) {
-        marker = this.createMarker(data.lat, data.lng, true, 'user_pi');
-        unlocked = true;
+      if (this.filters.get(type) || type != "" || type != null) {
+        // if a PI added by the authenticated user
+        if (owner == this.aut.getUser.uid) {
+          marker = this.createMarker(data.lat, data.lng, true, 'user_pi');
+          unlocked = true;
 
-        // PI added by another user
-      } else {
-        marker = this.createMarker(lat, lng, false); // Do not display the marker initially
+          // PI added by another user
+        } else {
+          marker = this.createMarker(lat, lng, false); // Do not display the marker initially
 
-        // Check if the PI is near an unlocked tower
-        this.towers.forEach((tower, keyTower, map) => {
-          if (tower.isNear(lat, lng)) {
-            tower.piInRange.push(key);
+          // Check if the PI is near an unlocked tower
+          this.towers.forEach((tower, keyTower, map) => {
+            if (tower.isNear(lat, lng)) {
+              tower.piInRange.push(key);
 
-            // If tower already activated => display the PI
-            if (tower.activated) {
-              unlocked = true;
-              marker.setMap(this.map);
+              // If tower already activated => display the PI
+              if (tower.activated) {
+                unlocked = true;
+                marker.setMap(this.map);
+              }
+              //console.log("PI " + key + " near tower " + keyTower + "[" + (tower.activated ? "activated" : "not activated") + "]");
+              //console.log("PI " + key + "[" + (unlocked ? "unlocked" : "locked") + "]");
             }
-            //console.log("PI " + key + " near tower " + keyTower + "[" + (tower.activated ? "activated" : "not activated") + "]");
-            //console.log("PI " + key + "[" + (unlocked ? "unlocked" : "locked") + "]");
-          }
-        });
+          });
+        }
       }
 
       // Add the PI in the map of PIs
       var newPI = new Pi(key, name, description,
         new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map);
       this.pis.set(key, newPI);
+
+      if (!this.filters.get(newPI.type) && newPI.type != "" && newPI.type != null) {
+        this.hideMarker(newPI.marker);
+      }
+
     });
 
 
