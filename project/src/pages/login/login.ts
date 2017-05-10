@@ -80,6 +80,8 @@ export class LoginPage {
         //console.log(user);
 
         // Add the user in the database
+        // TODO: if user has been removed from firebase and login then, he will have a ≠ uid
+        // TODO => clean the data with the previous uid
         var ref = firebase.database().ref("users/" + user.uid);
         ref.once("value")
           .then(function(snapshot) {
