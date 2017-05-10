@@ -41,6 +41,8 @@ export class Tower {
     return content;
   }
 
+  public get
+
   /**
    * Check if an element (PI/user) is near enough from the tower
    *
