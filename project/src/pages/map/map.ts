@@ -30,6 +30,7 @@ export class MapPage {
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
+  user_location;
 
   constructor(public navCtrl: NavController,
               public db: AngularFireDatabase,
@@ -62,6 +63,9 @@ export class MapPage {
     }
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
+    // Try to display the user current location
+    this.initGeolocation();
+
     // Display all the towers
     this.displayTowers();
 
@@ -70,9 +74,6 @@ export class MapPage {
 
     // Display all the unlocked pi
     this.initPI();
-
-    // Try to display the user current location
-    this.initGeolocation();
 
     // Create a button to add a marker
     var addMarkerControl = new Control_Map("Add marker", this.addMarkerController);
@@ -300,7 +301,8 @@ export class MapPage {
       let lng = towerSnapshot.child('lng').val();
 
       let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
-      var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker, undefined, this.infoWindow, this.map);
+      var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker,
+        undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location);
 
       // Add the tower to the map of markers
       this.towers.set(key, tower);
@@ -374,7 +376,6 @@ export class MapPage {
   /*************************************************
    **************** GEOLOCATION ********************
    *************************************************/
-
   private initGeolocation(): void {
     if (navigator.geolocation) {
       var userLocationMarker = new google.maps.Marker({
@@ -386,14 +387,41 @@ export class MapPage {
         this.displayInfoWindowOnMarker(userLocationMarker, "Your location");
       });
 
+      // Get an observable for the user position
+      this.user_location = this.geolocation.watchPosition();
 
-      var geolocation_options = {
-        enableHighAccuracy: true
-      };
+      // Udpate the marker each time a new location is received
+      this.user_location.subscribe((data) => {
+        let lat = data.coords.latitude;
+        let lng = data.coords.longitude;
 
-      navigator.geolocation.getCurrentPosition(position => {
-        let pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        userLocationMarker.setPosition(pos);
+        // Update the marker position
+        userLocationMarker.setPosition(new google.maps.LatLng(lat, lng));
+      }, error => {
+        console.log(error);
+
+        this.alertCtrl.create({
+          title: 'Geolocation error',
+          subTitle: 'An error occured while fetching your current location:\n' + error.message,
+          buttons: ['OK']
+        }).present();
+      });
+
+      /*
+        // HTML 5 Geolocation
+       var geolocation_options = {
+       enableHighAccuracy: true
+       };
+
+      navigator.geolocation.watchPosition((position) => {
+        let lat = position.coords.latitude;
+        let lng = position.coords.longitude;
+
+        // Update the user's current location
+        this.user_location = new google.maps.LatLng(lat, lng);
+
+        // Update the marker position
+        userLocationMarker.setPosition(this.user_location);
       }, error => {
         console.log(error);
 
@@ -404,6 +432,7 @@ export class MapPage {
         }).present();
 
       }, geolocation_options);
+      */
     }
   }
 }
