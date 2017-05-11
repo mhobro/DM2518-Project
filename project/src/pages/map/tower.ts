@@ -145,8 +145,11 @@ export class Tower {
         console.log(pi);
         pi.marker.setAnimation(google.maps.Animation.DROP);
         //pi.marker.setMap(map);
-        this.marker_cluster.addMarker(pi.marker, false);
         pi.unlocked = true;
+        pi.towerNear.push(this.key);
+        if (pi.mustBeDisplayed()) {
+          this.marker_cluster.addMarker(pi.marker, false);
+        }
       }
     })
 
@@ -170,6 +173,9 @@ export class Tower {
         console.log(pi);
         this.marker_cluster.removeMarker(pi.marker, false);
         pi.unlocked = false;
+        console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
+        pi.towerNear.splice(0, 1, this.key);
+        console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
       }
     })
 
@@ -182,7 +188,7 @@ export class Tower {
   public unlockTower() {
     this.activated = true;
     // Change the marker icon
-    this.marker.setIcon(map_style.icons['tower_unlocked'].icon);
+    this.marker.setIcon(map_style.getIcon('tower_unlocked'));
     // Display all the PIs near the tower
     this.displayAllNearestPis(this.pis);
 
@@ -194,7 +200,7 @@ export class Tower {
   public lockTower() {
     this.activated = false;
     // Change the marker icon
-    this.marker.setIcon(map_style.icons['tower_locked'].icon);
+    this.marker.setIcon(map_style.getIcon('tower_locked'));
     // Display all the PIs near the tower
     this.hideAllNearestPis(this.pis);
   }

@@ -30,9 +30,11 @@ export class MapPage {
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
 
+  filters: Array<{ name: string, type: string, state: boolean }>;
+
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
-  user_location;
-  markerCluster;
+  user_location; // The Observable object watching the user location
+  markerCluster; // The object containing all the marker on the map grouped by cluster
 
   constructor(public navCtrl: NavController,
               public db: AngularFireDatabase,
@@ -40,6 +42,12 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
+
+    // Define the list of type of PIs
+    this.filters = [
+      {name: 'Restaurant', type: 'restaurant', state: true},
+      {name: 'Sightseing', type: 'sightseeing', state: true}
+    ];
   }
 
   // Called when the view is fully loaded
@@ -84,13 +92,33 @@ export class MapPage {
   }
 
   /*************************************************
+   ************* FILTERS ***************************
+   *************************************************/
+
+  /**
+   * Called when a filter is toggled in the view
+   *
+   * @param filterIndex
+   */
+  public notifyFilterChange(filterIndex) {
+    //console.log("TOGGLED " + this.filters[filterIndex].state);
+    // Check if each marker must be displayed or not
+    this.pis.forEach((pi, key, map) => {
+      this.markerCluster.removeMarker(pi.marker, false);
+      if (pi.mustBeDisplayed()) {
+        this.markerCluster.addMarker(pi.marker, false);
+      }
+    });
+  }
+
+  /*************************************************
    ************* MARKER (PI & Tower) ***************
    *************************************************/
   private createMarker(lat, lng, displayed = true, type = 'default') {
     let marker = new google.maps.Marker({
       position: {lat: lat, lng: lng},
       map: (displayed ? this.map : null),
-      icon: map_style.icons[type].icon,
+      icon: map_style.getIcon(type),
       animation: google.maps.Animation.DROP
     });
     return marker;
@@ -119,20 +147,23 @@ export class MapPage {
       let data = piSnapshot.val();
       let owner = data.owner;
       let description = ""; // TODO : change when added in the db
-      let type = null; // / TODO : change when added in the db
+      let type = data.type;
       let lat = data.lat;
       let lng = data.lng;
       let unlocked = false;
-      let marker;
+      let marker = this.createMarker(lat, lng, false); // Do not display the marker initially
+
+      let newPI = new Pi(key, name, description,
+        new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map, this.aut.getUser.uid, this.filters)
 
       // if a PI added by the authenticated user
       if (owner == this.aut.getUser.uid) {
-        marker = this.createMarker(data.lat, data.lng, false, 'user_pi');
+        marker.setIcon(map_style.getIcon(type, true));
         unlocked = true;
 
         // PI added by another user
       } else {
-        marker = this.createMarker(lat, lng, false); // Do not display the marker initially
+          marker.setIcon(map_style.getIcon(type));
 
         // Check if the PI is near an unlocked tower
         this.towers.forEach((tower, keyTower, map) => {
@@ -142,19 +173,19 @@ export class MapPage {
             // If tower already activated => display the PI
             if (tower.activated) {
               unlocked = true;
+              newPI.towerNear.push(tower.key);
             }
           }
         });
       }
 
-      if (unlocked) {
+      console.log(type);
+      if (newPI.mustBeDisplayed()) {
         // Add the marker to the cluster = display the marker on the map
         this.markerCluster.addMarker(marker, false);
       }
 
       // Add the PI in the map of PIs
-      let newPI = new Pi(key, name, description,
-        new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map)
       this.pis.set(key, newPI);
     });
 
@@ -362,7 +393,7 @@ export class MapPage {
     if (navigator.geolocation) {
       var userLocationMarker = new google.maps.Marker({
         map: this.map,
-        icon: map_style.icons['user_location'].icon
+        icon: map_style.getIcon('user_location')
       });
 
       userLocationMarker.addListener('click', () => {
