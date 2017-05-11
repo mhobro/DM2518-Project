@@ -387,6 +387,21 @@ export class MapPage {
     this.menuRight.nativeElement.style.width = "0%";
   }
 
+  /*************************************************
+   **************** FRIENDS ********************
+   *************************************************/
+
+   public follow() : void {
+
+   }
+
+   public getUsers() {
+     var users = this.db.database.ref('users/');
+     users.once('value').then((snapshot) => {
+       console.log(snapshot.val());
+     });
+   }
+
 
   /*************************************************
    **************** GEOLOCATION ********************
