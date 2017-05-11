@@ -3,8 +3,9 @@ import {NavController, AlertController} from 'ionic-angular';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {Geolocation} from '@ionic-native/geolocation';
 
-import * as map_style from './map_style'; // File containin all the style for the map
+import * as map_style from './map_style'; // File containing all the style for the map
 import Utils from './utils'; // File containing all the utils functions
+import * as MarkerClusterer from 'node-js-marker-clusterer';
 
 import {Tower} from './tower';
 import {Pi} from './pi';
@@ -30,10 +31,12 @@ export class MapPage {
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
   public restaurant: boolean;
-  public filters: Map<string, boolean> = new Map();
+
+  filters: Array<{ name: string, type: string, state: boolean }>;
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
-  user_location;
+  user_location; // The Observable object watching the user location
+  markerCluster; // The object containing all the marker on the map grouped by cluster
 
   constructor(public navCtrl: NavController,
               public db: AngularFireDatabase,
@@ -41,8 +44,12 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
-    this.restaurant = true;
-    this.filters.set("restaurant", true);
+
+    // Define the list of type of PIs
+    this.filters = [
+      {name: 'Restaurant', type: 'restaurant', state: true},
+      {name: 'Sightseing', type: 'sightseeing', state: true}
+    ];
   }
 
   // Called when the view is fully loaded
@@ -71,14 +78,12 @@ export class MapPage {
     // Try to display the user current location
     this.initGeolocation();
 
-    // Display all the towers
+    // Display all the towers and the PIs
     this.displayTowers();
 
-    // Display all the markers of this user
-    //this.displayMarkerFromUser(this.aut.getUser.uid);
-
-    // Display all the unlocked pi
-    this.initPI();
+    // Add a marker clusterer to manage the markers.
+    this.markerCluster = new MarkerClusterer(this.map, [],
+      {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 
     // Create a button to add a marker
     var addMarkerControl = new Control_Map("Add marker", this.addMarkerController);
@@ -92,10 +97,20 @@ export class MapPage {
    ************* FILTERS ***************************
    *************************************************/
 
-  public notify() {
-    //console.log("TOGGLED" + this.restaurant);
-    this.filters.set("restaurant", this.restaurant);
-    this.loadMap();
+  /**
+   * Called when a filter is toggled in the view
+   *
+   * @param filterIndex
+   */
+  public notifyFilterChange(filterIndex) {
+    //console.log("TOGGLED " + this.filters[filterIndex].state);
+    // Check if each marker must be displayed or not
+    this.pis.forEach((pi, key, map) => {
+      this.markerCluster.removeMarker(pi.marker, false);
+      if (pi.mustBeDisplayed()) {
+        this.markerCluster.addMarker(pi.marker, false);
+      }
+    });
   }
 
   /*************************************************
@@ -105,7 +120,7 @@ export class MapPage {
     var marker = new google.maps.Marker({
       position: {lat: lat, lng: lng},
       map: (displayed ? this.map : null),
-      icon: map_style.icons[type].icon,
+      icon: map_style.getIcon(type),
       animation: google.maps.Animation.DROP
     });
     return marker;
@@ -138,44 +153,42 @@ export class MapPage {
       let lat = data.lat;
       let lng = data.lng;
       let unlocked = false;
-      let marker = null;
+      let marker = this.createMarker(lat, lng, false); // Do not display the marker initially
 
-      if (this.filters.get(type) || type != "" || type != null) {
-        // if a PI added by the authenticated user
-        if (owner == this.aut.getUser.uid) {
-          marker = this.createMarker(data.lat, data.lng, true, 'user_pi');
-          unlocked = true;
+      let newPI = new Pi(key, name, description,
+        new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map, this.aut.getUser.uid, this.filters)
 
-          // PI added by another user
-        } else {
-          marker = this.createMarker(lat, lng, false); // Do not display the marker initially
+      // if a PI added by the authenticated user
+      if (owner == this.aut.getUser.uid) {
+        marker.setIcon(map_style.getIcon(type, true));
+        unlocked = true;
 
-          // Check if the PI is near an unlocked tower
-          this.towers.forEach((tower, keyTower, map) => {
-            if (tower.isNear(lat, lng)) {
-              tower.piInRange.push(key);
+        // PI added by another user
+      } else {
+          marker.setIcon(map_style.getIcon(type));
 
-              // If tower already activated => display the PI
-              if (tower.activated) {
-                unlocked = true;
-                marker.setMap(this.map);
-              }
-              //console.log("PI " + key + " near tower " + keyTower + "[" + (tower.activated ? "activated" : "not activated") + "]");
-              //console.log("PI " + key + "[" + (unlocked ? "unlocked" : "locked") + "]");
+        // Check if the PI is near an unlocked tower
+        this.towers.forEach((tower, keyTower, map) => {
+          if (tower.isNear(lat, lng)) {
+            tower.piInRange.push(key);
+
+            // If tower already activated => display the PI
+            if (tower.activated) {
+              unlocked = true;
+              newPI.towerNear.push(tower.key);
             }
-          });
-        }
+          }
+        });
+      }
+
+      console.log(type);
+      if (newPI.mustBeDisplayed()) {
+        // Add the marker to the cluster = display the marker on the map
+        this.markerCluster.addMarker(marker, false);
       }
 
       // Add the PI in the map of PIs
-      var newPI = new Pi(key, name, description,
-        new google.maps.LatLng(lat, lng), marker, unlocked, type, owner, this.infoWindow, this.map);
       this.pis.set(key, newPI);
-
-      if (!this.filters.get(newPI.type) && newPI.type != "" && newPI.type != null) {
-        this.hideMarker(newPI.marker);
-      }
-
     });
 
 
@@ -186,33 +199,12 @@ export class MapPage {
       if (this.pis.has(key)) {
         let pi = this.pis.get(key);
         this.hideMarker(pi.marker);
-        //pi.marker.removeEventListener('click', pi.onclickListener);
+        this.markerCluster.removeMarker(pi.marker);
         this.pis.delete(key);
       }
 
       let userRef = this.db.database.ref('users/' + oldChildSnapshot.val().owner);
       userRef.child('pis/' + key).remove();
-    });
-  }
-
-  /*
-   Fetch and display the markers created by the user corresponding to uid
-   */
-  private displayMarkerFromUser(uid: any) {
-    var userRef = this.db.database.ref('users/' + this.aut.getUser.uid);
-    userRef.child('pis').once("value").then((snapshot) => {
-      // Iterate through all the marker's key belonging to this user
-      snapshot.forEach((childSnapshot) => {
-        var key = childSnapshot.key;
-        // Fetch the location of this marker
-        var markerRef = this.db.database.ref('pis/' + key);
-        markerRef.once("value").then((snapshot) => {
-          var data = snapshot.val();
-          if (data.owner === uid) {
-            this.createMarker(data.lat, data.lng, true, 'user_pi');
-          }
-        });
-      });
     });
   }
 
@@ -313,44 +305,45 @@ export class MapPage {
     var towersRef = this.db.database.ref('towers/');
     var userRef = this.db.database.ref('users/' + this.aut.getUser.uid + '/towers');
 
-    // Fetch all the tower in the db
-    // (called each time a new tower is added in the db)
-    towersRef.on('child_added', (towerSnapshot, prevChildKey) => {
-      // Fetch the tower information
-      let key = towerSnapshot.key;
-      let name = towerSnapshot.child('name').val();
-      let lat = towerSnapshot.child('lat').val();
-      let lng = towerSnapshot.child('lng').val();
+    towersRef.once('value').then((snapshot) => {
+      // Iterate through all the marker's key belonging to this user
+      snapshot.forEach((towerSnapshot) => {
+        // Fetch the tower information
+        let key = towerSnapshot.key;
+        let name = towerSnapshot.child('name').val();
+        let lat = towerSnapshot.child('lat').val();
+        let lng = towerSnapshot.child('lng').val();
 
-      let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
-      var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker,
-        undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location);
+        let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
+        var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker,
+          undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster);
 
-      // Add the tower to the map of markers
-      this.towers.set(key, tower);
+        // Add the tower to the map of markers
+        this.towers.set(key, tower);
 
-      // Fetch the state of the tower for this user
-      // (called when the tower state change for the authenticated user)
-      userRef.child(key).on('value', (userSnapshot, prevChildKey) => {
-        let activated: boolean = userSnapshot.val();
-        let tower = this.towers.get(key);
-        tower.activated = activated;
+        // Fetch the state of the tower for this user
+        // (called when the tower state change for the authenticated user)
+        userRef.child(key).on('value', (userSnapshot) => {
+          let activated: boolean = userSnapshot.val();
+          let tower = this.towers.get(key);
+          tower.activated = activated;
 
-        // Change the icon according to the state (lock/unlocked)
-        if (activated) {
-          tower.marker.setIcon(map_style.icons['tower_unlocked'].icon);
-          // Display all the PIs near the tower
-          tower.displayAllNearestPis(this.map, this.pis);
-
-        } else {
-          // Hide all the PIs near the tower
-          tower.marker.setIcon(map_style.icons['tower_locked'].icon);
-          tower.hideAllNearestPis(this.pis);
-        }
+          // Change the icon according to the state (lock/unlocked)
+          if (activated) {
+            tower.unlockTower();
+          } else {
+            // Hide all the PIs near the tower
+            tower.lockTower();
+          }
+        });
 
         // Display the tower on the map
         tower.marker.setMap(this.map);
       });
+
+      // Display all the unlocked pi
+      // We fetch the PI here because we need to have all the towers first (firebase => asynchronous)
+      this.initPI();
     });
 
     // Handler triggered every time a tower is removed from the db
@@ -402,7 +395,7 @@ export class MapPage {
     if (navigator.geolocation) {
       var userLocationMarker = new google.maps.Marker({
         map: this.map,
-        icon: map_style.icons['user_location'].icon
+        icon: map_style.getIcon('user_location')
       });
 
       userLocationMarker.addListener('click', () => {
@@ -428,33 +421,6 @@ export class MapPage {
           buttons: ['OK']
         }).present();
       });
-
-      /*
-        // HTML 5 Geolocation
-       var geolocation_options = {
-       enableHighAccuracy: true
-       };
-
-      navigator.geolocation.watchPosition((position) => {
-        let lat = position.coords.latitude;
-        let lng = position.coords.longitude;
-
-        // Update the user's current location
-        this.user_location = new google.maps.LatLng(lat, lng);
-
-        // Update the marker position
-        userLocationMarker.setPosition(this.user_location);
-      }, error => {
-        console.log(error);
-
-        this.alertCtrl.create({
-          title: 'Geolocation error',
-          subTitle: 'An error occured while fetching your current location:\n' + error.message,
-          buttons: ['OK']
-        }).present();
-
-      }, geolocation_options);
-      */
     }
   }
 }

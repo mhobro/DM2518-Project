@@ -23,9 +23,9 @@
 
       <ion-list>
 
-        <ion-item>
-          <ion-label>Restaurants</ion-label>
-          <ion-toggle [(ngModel)]="restaurant" (ionChange)="notify()"></ion-toggle>
+        <ion-item  *ngFor="let f of filters; let i=index">
+          <ion-label>{{f.name}}</ion-label>
+          <ion-toggle [(ngModel)]="filters[i]['state']" (ionChange)="notifyFilterChange(i)"></ion-toggle>
         </ion-item>
 
       </ion-list>
