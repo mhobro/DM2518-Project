@@ -32,7 +32,16 @@ export class MapPage {
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
   public restaurant: boolean;
 
-  filters: Array<{ name: string, type: string, state: boolean }>;
+  // Define the list of type of PIs
+  readonly filters: Array<{ name: string, type: string, state: boolean }> = [
+      {name: 'Food', type: 'food', state: true},
+      {name: 'Drink', type: 'drink', state: true},
+      {name: 'Shopping', type: 'shopping', state: true},
+      {name: 'Sightseeing', type: 'sightseeing', state: true},
+      {name: 'Entertainment', type: 'entertainment', state: true},
+      {name: 'Health', type: 'health', state: true},
+      {name: 'Services', type: 'services', state: true}
+    ];
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
   user_location; // The Observable object watching the user location
@@ -44,12 +53,6 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
-
-    // Define the list of type of PIs
-    this.filters = [
-      {name: 'Restaurant', type: 'restaurant', state: true},
-      {name: 'Sightseing', type: 'sightseeing', state: true}
-    ];
   }
 
   // Called when the view is fully loaded
