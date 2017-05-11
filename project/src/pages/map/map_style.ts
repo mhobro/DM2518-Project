@@ -39,7 +39,7 @@ const icons = {
       scaledSize: new google.maps.Size(35, 35)
     }
   },
-  shooping: {
+  shopping: {
     icon: {
       url: 'shopping.svg',
       scaledSize: new google.maps.Size(35, 35)
