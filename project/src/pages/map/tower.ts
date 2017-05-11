@@ -173,9 +173,9 @@ export class Tower {
         console.log(pi);
         this.marker_cluster.removeMarker(pi.marker, false);
         pi.unlocked = false;
-        console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
-        pi.towerNear.splice(0, 1, this.key);
-        console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
+        //console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
+        pi.towerNear.splice(pi.towerNear.indexOf(this.key), 1);
+        //console.log("[tower:" + this.key + "]" + "[pi:" + pi.key + "]" +  pi.towerNear);
       }
     })
 
