@@ -26,22 +26,13 @@ export class MapPage {
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
-
+  users: Array<{ id: string, name: string, email: string , following: boolean}>;
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
   public restaurant: boolean;
 
-  // Define the list of type of PIs
-  readonly filters: Array<{ name: string, type: string, state: boolean }> = [
-      {name: 'Food', type: 'food', state: true},
-      {name: 'Drink', type: 'drink', state: true},
-      {name: 'Shopping', type: 'shopping', state: true},
-      {name: 'Sightseeing', type: 'sightseeing', state: true},
-      {name: 'Entertainment', type: 'entertainment', state: true},
-      {name: 'Health', type: 'health', state: true},
-      {name: 'Services', type: 'services', state: true}
-    ];
+  filters: Array<{ name: string, type: string, state: boolean }>;
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
   user_location; // The Observable object watching the user location
@@ -53,6 +44,12 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
+
+    // Define the list of type of PIs
+    this.filters = [
+      {name: 'Restaurant', type: 'restaurant', state: true},
+      {name: 'Sightseing', type: 'sightseeing', state: true}
+    ];
   }
 
   // Called when the view is fully loaded
@@ -394,15 +391,37 @@ export class MapPage {
    **************** FRIENDS ********************
    *************************************************/
 
-   public follow() : void {
+   public followUser() : void {
 
    }
 
    public getUsers() {
-     var users = this.db.database.ref('users/');
-     users.once('value').then((snapshot) => {
-       console.log(snapshot.val());
+     var x = new Array();
+     var dbref = this.db.database.ref('users/');
+     dbref.once('value').then((snapshot) => {
+       snapshot.forEach((userSnapshot) => {
+         var id = this.aut.getUser.uid;
+         let key = userSnapshot.key;
+         let email = userSnapshot.child('email').val();
+         let name = userSnapshot.child('name').val();
+         //Fix this, need new fields in firebase with list of all users followed
+         let following = false;
+         if(key !== id){
+           x.push({
+               "id" : key,
+               "email" : email,
+               "name" : name,
+               "following" : following
+           });
+         }
+       });
      });
+     this.users = x;
+     console.log(this.users);
+   }
+
+   public notifyFollowChange(index) : void{
+
    }
 
 
