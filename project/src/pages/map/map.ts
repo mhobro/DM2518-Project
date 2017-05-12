@@ -26,7 +26,8 @@ export class MapPage {
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
-  users: Array<{ id: string, name: string, email: string , following: boolean}>;
+  following =  new Array();
+  users: Array<{ id: string, name: string, email: string , following: any}>;
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
@@ -399,14 +400,16 @@ export class MapPage {
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
      dbRef.once('value').then((snapshot) => {
        dbRef.child(friendId).set(this.users[index].email);
+       this.following.push({"id" : friendId, "name" : this.users[index].name, "email" : this.users[index].email});
+       console.log(this.following);
      });
    }
 
-   public unFollowUser(friendId) : void {
+   public unFollowUser(friendId, index) : void {
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
      dbRef.remove().then(function(){
-       console.log("successfully unfollowed");
+       //TODO add so remove from following array works
      }).catch(function(){
        console.log("error when unfollowing");
      });
@@ -422,7 +425,7 @@ export class MapPage {
          let email = userSnapshot.child('email').val();
          let name = userSnapshot.child('name').val();
          //Fix this, need new fields in firebase with list of all users followed
-         let following = false;
+         let following = userSnapshot.child('following').val();
          if(key !== id){
            x.push({
                "id" : key,
@@ -437,7 +440,7 @@ export class MapPage {
      console.log(this.users);
    }
 
-   public notifyFollowChange(index) : void{
+   public notifyFollowChange(index) : void {
      console.log("notifyfollow");
      var uid = this.aut.getUser.uid;
      var friendId = this.users[index].id;
@@ -453,12 +456,19 @@ export class MapPage {
            if (!friendSnapshot.exists()) {
              this.followUser(friendId, index);
            }else{
-             this.unFollowUser(friendId);
+             this.unFollowUser(friendId, index);
            }
          });
-     }
-   });
- }
+       }
+     });
+   }
+
+  public showFriends() : void {
+    this.users.forEach((following, key, array) => {
+
+    });
+
+  }
 
 
   /*************************************************
