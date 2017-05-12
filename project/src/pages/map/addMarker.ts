@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController, AlertController} from 'ionic-angular';
+import {NavController} from 'ionic-angular';
 
 import {AngularFireDatabase} from 'angularfire2/database';
 import {AuthService} from '../../providers/authentication.service';

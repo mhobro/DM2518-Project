@@ -72,24 +72,4 @@ page-map {
     width: 2.5em !important;
     border-radius: 50%;
   }
-
-
-  /*
-    Add Marker Form
-   */
-
-  #addMarkerForm {
-    color: #ffffff;
-  }
-
-  #addMarkerForm .form-control {
-    color: #000000;
-  }
-
-  .ng-valid[required], .ng-valid.required  {
-    border-left: 5px solid #42A948; /* green */
-  }
-  .ng-invalid:not(form)  {
-    border-left: 5px solid #a94442; /* red */
-  }
 }
