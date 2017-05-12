@@ -395,6 +395,7 @@ export class MapPage {
    **************** FRIENDS ********************
    *************************************************/
 
+   //Adds a user as followed in firebase and also locally in the following array
    public followUser(friendId, index) : void {
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
@@ -405,16 +406,19 @@ export class MapPage {
      });
    }
 
+   //Removes the user as followed in firebase and also removes it locally from
+   //the following array
    public unFollowUser(friendId, index) : void {
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
      dbRef.remove().then(function(){
-       //TODO add so remove from following array works
+       //TODO add so remove from the following array works
      }).catch(function(){
        console.log("error when unfollowing");
      });
    }
 
+   //Fetches all users to the users array
    public getUsers() {
      var x = new Array();
      var dbref = this.db.database.ref('users/');
@@ -440,6 +444,8 @@ export class MapPage {
      console.log(this.users);
    }
 
+   //Called when a person is followed/unfollowed and will handle that event
+   //Removing/adding the person from the following array 
    public notifyFollowChange(index) : void {
      console.log("notifyfollow");
      var uid = this.aut.getUser.uid;
