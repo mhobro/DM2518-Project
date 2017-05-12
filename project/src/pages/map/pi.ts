@@ -62,6 +62,7 @@ export class Pi {
   public getHTMLDebug() {
     let content = document.createElement('div');
     content.innerHTML += "<p>Key : " + this.key + "</p>";
+    content.innerHTML += "<p>Name : " + this.name + "</p>";
     content.innerHTML += "<p>Description : " + this.description + "</p>";
     content.innerHTML += "<p>Type : " + this.type + "</p>";
     content.innerHTML += "<p>Lat : " + this.location.lat() + "</p>";

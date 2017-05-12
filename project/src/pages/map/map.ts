@@ -9,7 +9,6 @@ import * as MarkerClusterer from 'node-js-marker-clusterer';
 
 import {Tower} from './tower';
 import {Pi} from './pi';
-import {Control_Map} from './map_control';
 
 import {AuthService} from '../../providers/authentication.service';
 
@@ -26,22 +25,24 @@ export class MapPage {
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
-
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
-  public restaurant: boolean;
+
+  addPIControl; // Button to add a PI
+  rightMenuControl; // Button to open the right menu
+
 
   // Define the list of type of PIs
   readonly filters: Array<{ name: string, type: string, state: boolean }> = [
-      {name: 'Food', type: 'food', state: true},
-      {name: 'Drink', type: 'drink', state: true},
-      {name: 'Shopping', type: 'shopping', state: true},
-      {name: 'Sightseeing', type: 'sightseeing', state: true},
-      {name: 'Entertainment', type: 'entertainment', state: true},
-      {name: 'Health', type: 'health', state: true},
-      {name: 'Services', type: 'services', state: true}
-    ];
+    {name: 'Food', type: 'food', state: true},
+    {name: 'Drink', type: 'drink', state: true},
+    {name: 'Shopping', type: 'shopping', state: true},
+    {name: 'Sightseeing', type: 'sightseeing', state: true},
+    {name: 'Entertainment', type: 'entertainment', state: true},
+    {name: 'Health', type: 'health', state: true},
+    {name: 'Services', type: 'services', state: true}
+  ];
 
   infoWindow: google.maps.InfoWindow = new google.maps.InfoWindow();
   user_location; // The Observable object watching the user location
@@ -75,7 +76,8 @@ export class MapPage {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       styles: map_style.mapstyle,
       mapTypeControl: false
-    }
+    };
+
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
     // Try to display the user current location
@@ -87,10 +89,6 @@ export class MapPage {
     // Add a marker clusterer to manage the markers.
     this.markerCluster = new MarkerClusterer(this.map, [],
       {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-
-    // Create a button to add a marker
-    var addMarkerControl = new Control_Map("Add marker", this.addMarkerController);
-    this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(addMarkerControl.controlDiv); //TODO: Change the position of the button
 
     // Overlays menus
     this.initMenus();
@@ -119,11 +117,11 @@ export class MapPage {
   /*************************************************
    ************* MARKER (PI & Tower) ***************
    *************************************************/
-  private createMarker(lat, lng, displayed = true, type = 'default') {
+  public createMarker(lat, lng, displayed = true, userIcon = false, type = 'default') {
     var marker = new google.maps.Marker({
       position: {lat: lat, lng: lng},
       map: (displayed ? this.map : null),
-      icon: map_style.getIcon(type),
+      icon: map_style.getIcon(type, userIcon),
       animation: google.maps.Animation.DROP
     });
     return marker;
@@ -151,7 +149,8 @@ export class MapPage {
       let key = piSnapshot.key;
       let data = piSnapshot.val();
       let owner = data.owner;
-      let description = ""; // TODO : change when added in the db
+      let name = data.name;
+      let description = data.description;
       let type = data.type;
       let lat = data.lat;
       let lng = data.lng;
@@ -168,7 +167,7 @@ export class MapPage {
 
         // PI added by another user
       } else {
-          marker.setIcon(map_style.getIcon(type));
+        marker.setIcon(map_style.getIcon(type));
 
         // Check if the PI is near an unlocked tower
         this.towers.forEach((tower, keyTower, map) => {
@@ -209,95 +208,6 @@ export class MapPage {
       let userRef = this.db.database.ref('users/' + oldChildSnapshot.val().owner);
       userRef.child('pis/' + key).remove();
     });
-  }
-
-  /*
-   Handler called after a click on the Add marker button
-   */
-  private addMarkerController = (control: Control_Map) => {
-    var position = this.map.getCenter();
-    var marker = this.createMarker(position.lat(), position.lng(), true, 'user_pi');
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-    marker.setDraggable(true);
-
-    this.map.setCenter(marker.getPosition());
-
-    // Add a cancel button
-    control.controlDiv.style.clear = 'both';
-    control.controlUI.style.cssFloat = 'left';
-
-    var cancelControl = Utils.createMapControlButton('Cancel');
-    var cancelControlUI = cancelControl.controlUI;
-    cancelControlUI.style.cssFloat = 'left';
-    cancelControlUI.style.marginLeft = '12px';
-    control.controlDiv.appendChild(cancelControlUI);
-
-    // Set the action of the cancel button
-    cancelControlUI.addEventListener('click', () => {
-      marker.setMap(null);
-
-      // Remove the cancel button once clicked
-      cancelControlUI.parentNode.removeChild(cancelControlUI);
-
-      // Reset the action of the add marker button
-      control.change_action(() => {
-        this.addMarkerController(control)
-      }, "Add marker");
-    });
-
-    // Set the action and text of the validate button
-    control.change_action(() => {
-      this.validateMarker(marker, control);
-      cancelControlUI.parentNode.removeChild(cancelControlUI);
-    }, "Validate marker");
-  }
-
-  /*
-   Handler called after a click on the Validate marker button
-   */
-  private validateMarker = (marker, control) => {
-    marker.draggable = false;
-    marker.setAnimation(null);
-    marker.setMap(null); // remove this marker bcs it will be display once successfully added in the db
-
-    // Add the new PI in the db
-    var markersRef = this.db.database.ref('pis');
-    var newMarkerRef = markersRef.push();
-    var lat = marker.position.lat();
-    var lng = marker.position.lng();
-    var owner = this.aut.getUser.uid;
-    let name = ""; // TODO : get from html
-    let description = ""; // TODO : get from html
-    let type = ""; // TODO : get from html
-
-    newMarkerRef.set(
-      {
-        'lat': lat,
-        'lng': lng,
-        'owner': owner,
-        'description': description,
-        'type': type, // TODO : get from html,
-        'name': name // TODO : get from html
-      }
-    ).then(() => {
-      // Append the marker in the user's markers
-      let key = newMarkerRef.key;
-      let userRef = this.db.database.ref('users/' + owner);
-      userRef.child('pis').child(key).set(true);
-
-    }).catch(function () {
-      // Display the error
-      this.alertCtrl.create({
-        title: 'Marker not added',
-        subTitle: 'An error occured while adding the marker in the database.',
-        buttons: ['OK']
-      }).present();
-    });
-
-    // Reset the action and the text of the add button
-    control.change_action(() => {
-      this.addMarkerController(control)
-    }, "Add marker");
   }
 
 
@@ -367,20 +277,26 @@ export class MapPage {
 
   private initMenus(): void {
     // Create a button to open the left menu
-    var addLeftMenuControl = new Control_Map("Menu", () => {
+    this.addPIControl = Utils.createIconButton("add", () => {
       this.menuRight.nativeElement.style.width = "0%";
-      this.menuLeft.nativeElement.style.width = "50%";
+      this.menuLeft.nativeElement.style.width = "75%";
     });
-    this.map.controls[google.maps.ControlPosition.LEFT_CENTER].push(addLeftMenuControl.controlDiv);
+    this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(this.addPIControl);
+
 
     // Create a button to open the rigth menu
-    var addRigthMenuControl = new Control_Map("Menu", () => {
+    this.rightMenuControl = Utils.createIconButton("menu", () => {
       this.menuLeft.nativeElement.style.width = "0%";
-      this.menuRight.nativeElement.style.width = "50%";
+      this.menuRight.nativeElement.style.width = "75%";
     });
-    this.map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(addRigthMenuControl.controlDiv);
-  }
+    this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(this.rightMenuControl);
 
+    // Add click handler on the map to close the menu
+    this.map.addListener('click', () => {
+      this.closeLeftMenu();
+      this.closeRightMenu();
+    });
+  }
 
   public closeLeftMenu(): void {
     this.menuLeft.nativeElement.style.width = "0%";
