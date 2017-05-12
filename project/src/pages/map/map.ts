@@ -394,8 +394,22 @@ export class MapPage {
    **************** FRIENDS ********************
    *************************************************/
 
-   public followUser() : void {
+   public followUser(friendId, index) : void {
+     var uid = this.aut.getUser.uid;
+     var dbRef = this.db.database.ref('users/' + uid + '/following/');
+     dbRef.once('value').then((snapshot) => {
+       dbRef.child(friendId).set(this.users[index].email);
+     });
+   }
 
+   public unFollowUser(friendId) : void {
+     var uid = this.aut.getUser.uid;
+     var dbRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
+     dbRef.remove().then(function(){
+       console.log("successfully unfollowed");
+     }).catch(function(){
+       console.log("error when unfollowing");
+     });
    }
 
    public getUsers() {
@@ -424,8 +438,27 @@ export class MapPage {
    }
 
    public notifyFollowChange(index) : void{
-
-   }
+     console.log("notifyfollow");
+     var uid = this.aut.getUser.uid;
+     var friendId = this.users[index].id;
+     var followingRef = this.db.database.ref('users/' + uid + '/following');
+     var userRef = this.db.database.ref('users/' + uid);
+     followingRef.once('value').then((snapshot) => {
+       if (!snapshot.exists()) {
+         userRef.child('following').set("null");
+         followingRef.child(friendId).set(this.users[index].email);
+       }else{
+         var checkIfFollowRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
+         checkIfFollowRef.once('value').then((friendSnapshot) => {
+           if (!friendSnapshot.exists()) {
+             this.followUser(friendId, index);
+           }else{
+             this.unFollowUser(friendId);
+           }
+         });
+     }
+   });
+ }
 
 
   /*************************************************
