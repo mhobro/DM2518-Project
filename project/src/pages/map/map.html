@@ -40,9 +40,8 @@
         </ion-item>
       </ion-list>
 
-      <!--<button ion-button round (click)="showFriends()" type="submit">Show people followed</button-->
+      <a href="#">You are following</a>
       <ion-list>
-        <p> You are following </p>
         <ion-item  *ngFor="let f of following; let i=index">
           <ion-label>{{f.name}}</ion-label>
         </ion-item>
