@@ -31,15 +31,13 @@
       </ion-list>
 
       <a href="#">Friends</a>
-      <button ion-button round (click)="getUsers()" type="submit">Display users</button>
-
+      <!--<button ion-button round (click)="getUsers()" type="submit">Display users</button>-->
+      <ion-searchbar (ionInput)="searchUser($event)" placeholder="Search for users"></ion-searchbar>
       <ion-list>
-
-        <ion-item  *ngFor="let f of users; let i=index">
-          <ion-label>{{f.email}}</ion-label>
+        <ion-item  *ngFor="let f of usersFiltered; let i=index">
+          <ion-label>{{f}}</ion-label>
           <ion-toggle (ionChange)="notifyFollowChange(i)"></ion-toggle>
         </ion-item>
-
       </ion-list>
 
       <!--<button ion-button round (click)="showFriends()" type="submit">Show people followed</button-->

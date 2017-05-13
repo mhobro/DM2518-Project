@@ -27,7 +27,10 @@ export class MapPage {
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
   following =  new Array();
-  users: Array<{ id: string, name: string, email: string , following: any}>;
+  usersFiltered : string[];
+  usersInitial : string[];
+  users = new Array();
+  followString: string = '';
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
   pis: Map<string, any> = new Map(); // Map associating the pi's key to the pi's object
@@ -54,6 +57,7 @@ export class MapPage {
               public alertCtrl: AlertController,
               public aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
+    this.getUsers();
   }
 
   // Called when the view is fully loaded
@@ -421,6 +425,7 @@ export class MapPage {
    //Fetches all users to the users array
    public getUsers() {
      var x = new Array();
+     var uFilt = new Array();
      var dbref = this.db.database.ref('users/');
      dbref.once('value').then((snapshot) => {
        snapshot.forEach((userSnapshot) => {
@@ -437,15 +442,19 @@ export class MapPage {
                "name" : name,
                "following" : following
            });
+           if(name != null){
+              uFilt.push(name);
+           }
          }
        });
      });
      this.users = x;
-     console.log(this.users);
+     this.usersFiltered = uFilt;
+     this.usersInitial = uFilt;
    }
 
    //Called when a person is followed/unfollowed and will handle that event
-   //Removing/adding the person from the following array 
+   //Removing/adding the person from the following array
    public notifyFollowChange(index) : void {
      console.log("notifyfollow");
      var uid = this.aut.getUser.uid;
@@ -467,15 +476,21 @@ export class MapPage {
          });
        }
      });
-   }
+    }
 
-  public showFriends() : void {
-    this.users.forEach((following, key, array) => {
+    public searchUser(ev: any){
+      this.usersFiltered = this.usersInitial;
+      console.log(this.usersFiltered);
+      console.log(this.usersInitial);
+      let val = ev.target.value;
+      // if the value is an empty string don't filter the items
+      if (val && val.trim() != '' ) {
+        this.usersFiltered = this.usersFiltered.filter((item) => {
+          return (item.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        })
+      }
 
-    });
-
-  }
-
+    }
 
   /*************************************************
    **************** GEOLOCATION ********************
