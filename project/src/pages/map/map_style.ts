@@ -5,14 +5,14 @@
 const icons = {
   tower_locked: {
     icon: {
-      url: 'tower_red.svg',
-      scaledSize: new google.maps.Size(35, 35)
+      url: 'tower_locked.svg',
+      scaledSize: new google.maps.Size(42, 70)
     }
   },
   tower_unlocked: {
     icon: {
-      url: 'tower_green.svg',
-      scaledSize: new google.maps.Size(35, 35)
+      url: 'tower_unlocked.svg',
+      scaledSize: new google.maps.Size(42, 70)
     }
   },
   user_pi: {
@@ -23,7 +23,7 @@ const icons = {
   },
   user_location: {
     icon: {
-      url: 'point_orange.svg',
+      url: 'user_location.svg',
       scaledSize: new google.maps.Size(64, 64)
     }
   },

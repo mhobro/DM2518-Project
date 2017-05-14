@@ -72,4 +72,16 @@ page-map {
     width: 2.5em !important;
     border-radius: 50%;
   }
+
+  .map_control.button-md, .map_control.button-md:hover {
+    background-color: orange;
+  }
+
+  /*#button_add_marker .icon-md:before {
+    content: url('../../assets/marker/add_marker.svg');
+  }*/
+
+  #menuRight{
+    color: white;
+  }
 }

@@ -64,7 +64,6 @@ export class AddMarkerComponent {
 
       this.validateMarker(marker, piInfo);
     });
-    this.validateAddPIControl.style.paddingLeft = "12px";
     this.mapComponent.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(this.validateAddPIControl);
 
 
