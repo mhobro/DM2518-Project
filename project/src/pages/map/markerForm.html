@@ -1,0 +1,35 @@
+<div class="container" id="addMarkerForm">
+  <ion-toolbar>
+    <ion-title><h1>Create a new marker</h1></ion-title>
+  </ion-toolbar>
+
+  <form (ngSubmit)="onSubmit()" #addMarkerForm="ngForm">
+    <ion-item>
+      <ion-label for="name">*Name:</ion-label>
+      <ion-input type="text" class="form-control" id="name" [(ngModel)]="model.name" name="name" #name="ngModel"
+                 required></ion-input>
+      <div [hidden]="name.valid || name.pristine"
+           class="alert alert-danger">
+        Name is required
+      </div>
+    </ion-item>
+
+    <ion-item>
+      <ion-label for="type">*Type:</ion-label>
+      <ion-select class="form-control" id="type" [(ngModel)]="model.type" name="type" required>
+        <ion-option *ngFor="let filter of filters" [value]="filter.type">{{filter.name}}</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label for="description">Description:</ion-label>
+      <ion-textarea id="description" class="form-control" [(ngModel)]="model.description"
+                    name="description">
+      </ion-textarea>
+    </ion-item>
+
+    <button ion-button round block type="submit" class="btn btn-success" [disabled]="!addMarkerForm.form.valid">Place on
+      the map
+    </button>
+  </form>
+</div>

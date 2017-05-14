@@ -44,4 +44,30 @@ export default class Utils {
 
     return {controlUI, controlText};
   }
+
+  /**
+   * Create a icon button with the specified onclickhandler given as paramater
+   *
+   * @param ionicIconName
+   * @param onclickHandler
+   * @returns {HTMLElementTagNameMap[string]}
+   */
+  static createIconButton(ionicIconName, onclickHandler) {
+    var button = document.createElement('button');
+    button.setAttribute("icon-only", "");
+    button.setAttribute("ion-button", "");
+    button.setAttribute("class", "map_control button button-md button-default button-default-md button-large button-large-md");
+    button.style.transition = "none";
+    //button.style.borderRadius = "50%";
+    button.innerHTML = '<span class="button-inner">' +
+      '<ion-icon role="img" class="icon icon-md ion-md-' + ionicIconName + ' ng-reflect-name="' + ionicIconName + '"></ion-icon> ' +
+      '</span>' +
+      ' <div class="button-effect"></div>' +
+      '</button>';
+
+    // Setup the click event listeners.
+    button.addEventListener('click', onclickHandler);
+
+    return button;
+  }
 }

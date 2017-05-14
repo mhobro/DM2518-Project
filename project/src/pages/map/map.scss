@@ -65,4 +65,11 @@ page-map {
   .overlay .closebtn.left {
     left: 15px;
   }
+
+
+  .map_control.button-large-md {
+    height: 2.5em !important;
+    width: 2.5em !important;
+    border-radius: 50%;
+  }
 }
