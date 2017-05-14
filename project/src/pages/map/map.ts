@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef} from '@angular/core';
+import {Component, ViewChild, ElementRef, ComponentFactoryResolver, ViewContainerRef} from '@angular/core';
 import {NavController, AlertController} from 'ionic-angular';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {Geolocation} from '@ionic-native/geolocation';
@@ -11,6 +11,9 @@ import {Tower} from './tower';
 import {Pi} from './pi';
 
 import {AuthService} from '../../providers/authentication.service';
+import {TowerView} from "./towerView";
+import {RightOverlay} from "./right_overlay";
+import {FilterView} from "./filter_view";
 
 declare var google;
 
@@ -24,6 +27,7 @@ export class MapPage {
   @ViewChild('map') mapElement: ElementRef; // Ref to the container of the map in the HTML
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
+  @ViewChild(RightOverlay, {read: ViewContainerRef}) protected rightOverlayRef: ViewContainerRef;
 
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
@@ -31,7 +35,6 @@ export class MapPage {
 
   addPIControl; // Button to add a PI
   rightMenuControl; // Button to open the right menu
-
 
   // Define the list of type of PIs
   readonly filters: Array<{ name: string, type: string, state: boolean }> = [
@@ -52,7 +55,8 @@ export class MapPage {
               public db: AngularFireDatabase,
               public geolocation: Geolocation,
               public alertCtrl: AlertController,
-              public aut: AuthService) {
+              public aut: AuthService,
+              private _componentFactoryResolver: ComponentFactoryResolver) {
     this.header_data = {titlePage: "Map", isMenu: true};
   }
 
@@ -229,7 +233,7 @@ export class MapPage {
 
         let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
         var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker,
-          undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster);
+          undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster, this);
 
         // Add the tower to the map of markers
         this.towers.set(key, tower);
@@ -270,6 +274,16 @@ export class MapPage {
     });
   }
 
+  public displayTowerInfo(tower: Tower) {
+    let componentFactory = this._componentFactoryResolver.resolveComponentFactory(TowerView);
+
+    this.rightOverlayRef.clear();
+    let componentRef = this.rightOverlayRef.createComponent(componentFactory);
+    (<TowerView>componentRef.instance).data = tower;
+
+    this.openRightMenu();
+  }
+
 
   /*************************************************
    ******************* MENUS ***********************
@@ -281,6 +295,7 @@ export class MapPage {
       this.menuRight.nativeElement.style.width = "0%";
       this.menuLeft.nativeElement.style.width = "75%";
     });
+    this.addPIControl.id = "button_add_marker";
     this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(this.addPIControl);
 
 
@@ -288,6 +303,12 @@ export class MapPage {
     this.rightMenuControl = Utils.createIconButton("menu", () => {
       this.menuLeft.nativeElement.style.width = "0%";
       this.menuRight.nativeElement.style.width = "75%";
+
+      let componentFactory = this._componentFactoryResolver.resolveComponentFactory(FilterView);
+      this.rightOverlayRef.clear();
+      let componentRef = this.rightOverlayRef.createComponent(componentFactory);
+      (<FilterView>componentRef.instance).data = this.filters;
+      (<FilterView>componentRef.instance).mapComponent = this;
     });
     this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(this.rightMenuControl);
 
@@ -296,6 +317,10 @@ export class MapPage {
       this.closeLeftMenu();
       this.closeRightMenu();
     });
+  }
+
+  public openRightMenu(): void {
+    this.menuRight.nativeElement.style.width = "75%";
   }
 
   public closeLeftMenu(): void {

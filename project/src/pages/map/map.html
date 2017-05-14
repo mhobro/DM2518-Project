@@ -7,7 +7,7 @@
 
   <!-- The left overlay -->
   <div #menuLeft id="menuLeft" class="overlay left">
-    <a class="closebtn right" (click)="closeLeftMenu()" >&times;</a>
+    <a class="closebtn right" (click)="closeLeftMenu()">&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
       <!-- Form to add a new marker -->
@@ -17,20 +17,12 @@
 
   <!-- The right overlay -->
   <div #menuRight id="menuRight" class="overlay right">
-    <a class="closebtn left" (click)="closeRightMenu()" >&times;</a>
-    <!-- Overlay content -->
+    <a class="closebtn left" (click)="closeRightMenu()">&times;</a>
     <div class="overlay-content">
-      <a href="#">Filters</a>
 
-      <ion-list>
-        <ion-item  *ngFor="let f of filters; let i=index">
-          <ion-label>{{f.name}}</ion-label>
-          <ion-toggle [(ngModel)]="filters[i]['state']" (ionChange)="notifyFilterChange(i)"></ion-toggle>
-        </ion-item>
+      <!-- Overlay content -->
+      <ng-template right_overlay></ng-template>
 
-      </ion-list>
-
-      <a href="#">Friends</a>
     </div>
   </div>
 </ion-content>
