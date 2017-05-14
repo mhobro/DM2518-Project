@@ -26,9 +26,10 @@ export class MapPage {
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
+  following = new Array();
   usersFiltered : string[];
   usersInitial : string[];
-  users = new Array<{id: string, name: string, email: string, following: boolean}>();
+  users = new Array();
   followString: string = '';
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
@@ -408,8 +409,16 @@ export class MapPage {
    public followUser(friendId, index) : void {
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
+     var friendRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
      dbRef.once('value').then((snapshot) => {
-       dbRef.child(friendId).set(this.users[index].email);
+       this.following.push({"id" : snapshot.key, "name" : snapshot.name});
+       dbRef.child(friendId);
+       friendRef.once('value').then((snap) => {
+         if(!snap.exists()){
+           friendRef.child('name').set(this.users[index].name);
+           friendRef.child('email').set(this.users[index].email);
+         }
+       });
        this.users.forEach((user) => {
          if (user.id === friendId) {
            user.following = true;
@@ -433,6 +442,13 @@ export class MapPage {
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
      dbRef.child(friendId).remove();
+     for(var i = 0; i < this.following.length; i++){
+       if(this.following[i].id == friendId){
+         if (index > -1) {
+          this.following.splice(i, 1);
+         }
+       }
+     }
      this.pis.forEach((pi, key, map) => {
        this.markerCluster.removeMarker(pi.marker, false);
        if (this.isFollowing(pi.owner)) {
@@ -446,6 +462,7 @@ export class MapPage {
    //Fetches all users to the users array
    public getUsers() {
      var x = new Array();
+     var flw = new Array();
      var uFilt = new Array();
      var dbref = this.db.database.ref('users/');
      var followRef = this.db.database.ref('users/' + this.aut.getUser.uid + '/following/');
@@ -455,8 +472,9 @@ export class MapPage {
          let key = userSnapshot.key;
          let email = userSnapshot.child('email').val();
          let name = userSnapshot.child('name').val();
-         if(key !== id){
+         let flwing = userSnapshot.child('following').val();
 
+         if(key !== id){
            followRef.once('value', function (snapshot) {
              //console.log(snapshot.child(key).exists());
              //console.log(key);
@@ -464,16 +482,23 @@ export class MapPage {
                "id": key,
                "email": email,
                "name": name,
-               "following": snapshot.child(key).exists()
-             })
+               "following": flwing
+             });
            });
 
            if(name != null){
               uFilt.push(name);
            }
+         }else{
+           followRef.once('value').then((snap) => {
+             snapshot.forEach((snap2) => {
+               flw.push({"id" : snap2.key, "name" : snap2.child("name").val()})
+             });
+           });
          }
        });
      });
+     this.following = flw;
      this.users = x;
      this.usersFiltered = uFilt;
      this.usersInitial = uFilt;
