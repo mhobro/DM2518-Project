@@ -15,7 +15,7 @@ page-map {
     background-color: rgb(0, 0, 0); /* Black fallback color */
     background-color: rgba(0, 0, 0, 0.9); /* Black w/opacity */
     overflow-x: hidden; /* Disable horizontal scroll */
-    transition: 0.5s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+    transition: 0.3s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
   }
 
   .overlay.right {
@@ -29,41 +29,44 @@ page-map {
   /* Position the content inside the overlay */
   .overlay-content {
     position: absolute;
-    top: 20px; /* 5% from the top */
+    //top: 20px; /* 5% from the top */
     width: 100%; /* 100% width */
     text-align: center; /* Centered text/links */
-    margin-top: 60px; /* 30px top margin to avoid conflict with the close button on smaller screens */
+    //margin-top: 20px; /* 30px top margin to avoid conflict with the close button on smaller screens */
+    padding: 0px;
+    background: #f7d461;
+    min-height: 100%;
   }
 
   /* The navigation links inside the overlay */
   .overlay a {
-    padding: 8px;
+    padding-left: 8px;
     text-decoration: none;
     font-size: 36px;
-    color: #818181;
-    display: block; /* Display block instead of inline */
     transition: 0.3s; /* Transition effects on hover (color) */
   }
 
   /* When you mouse over the navigation links, change their color */
-  .overlay a:hover,
-  .overlay a:focus {
-    color: #f1f1f1;
+  .overlay .closebtn:hover,
+  .overlay .closebtn:focus {
+    color: #747474;
   }
 
   /* Position the close button (top corner) */
   .overlay .closebtn {
     position: absolute;
-    top: 10px;
-    font-size: 50px;
+    z-index: 2;
+    color: #3d3d3d;
   }
 
   .overlay .closebtn.right {
     right: 15px;
+    top: 0px;
   }
 
   .overlay .closebtn.left {
     left: 15px;
+    top: 0px;
   }
 
 
@@ -73,15 +76,94 @@ page-map {
     border-radius: 50%;
   }
 
-  .map_control.button-md, .map_control.button-md:hover {
+  .map_control.button-md,
+  .map_control.button-md:hover {
     background-color: orange;
   }
 
-  /*#button_add_marker .icon-md:before {
-    content: url('../../assets/marker/add_marker.svg');
-  }*/
-
   #menuRight, #rightInfoPanel{
     color: white;
+  }
+
+  .overlay .toolbar {
+    min-height: 60px;
+  }
+
+  .overlay ion-title {
+    padding: 0px;
+  }
+/*
+  .overlay .toolbar-background {
+    background-color: orange;
+  }
+  */
+
+  .overlay .toolbar-title {
+    color: white;
+  }
+
+  .overlay .label {
+    font-weight: bold;
+  }
+
+  .overlay ion-select {
+    padding-left: 0px;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #menuLeft  ion-item {
+    padding: 10px;
+    margin: 15px auto;
+  }
+
+  #menuRight ion-item {
+    margin: 5px auto;
+    border: none;
+    font-size: 1.5rem;
+  }
+
+  #menuRight ion-item .item-inner {
+    border: none;
+  }
+
+  .overlay ion-item {
+    border-radius: 10px;
+    width: 90%;
+  }
+
+
+  .overlay ion-item,
+  .overlay input {
+    color: #616161 !important;
+    background-color: white;
+  }
+
+  .overlay .item-inner {
+    padding: 5px;
+  }
+
+  #rightInfoPanel {
+    color: #454545 !important;
+    font-weight: bold;
+  }
+
+  #rightInfoPanel #towerTitle {
+    margin: 20px auto;
+    background-color: orange;
+    min-height: 90px;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  #rightInfoPanel #towerTitle h1 {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+  }
+
+  a[disabled], button[disabled], [ion-button][disabled] {
+    opacity: 0.3;
   }
 }

@@ -7,35 +7,45 @@
 
   <!-- The left overlay -->
   <div #menuLeft id="menuLeft" class="overlay left">
-    <a class="closebtn right" (click)="closeLeftMenu()" >&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
-      <!-- Form to add a new marker -->
-      <add-marker-form></add-marker-form>
+      <div class="container">
+        <ion-toolbar color="orange">
+          <a class="closebtn right" (click)="closeLeftMenu()">&times;</a>
+          <ion-title><h2>New marker</h2></ion-title>
+        </ion-toolbar>
+
+        <!-- Form to add a new marker -->
+        <add-marker-form></add-marker-form>
+      </div>
     </div>
   </div>
 
   <!-- The right overlay -->
   <div #menuRight id="menuRight" class="overlay right">
-    <a class="closebtn left" (click)="closeRightMenu()" >&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
-      <a href="#">Filters</a>
+      <div class="container">
+        <ion-toolbar color="orange">
+          <a class="closebtn left" (click)="closeRightMenu();">&times;</a>
+          <ion-title><h2>Menu</h2></ion-title>
+        </ion-toolbar>
+        <h4>Filters</h4>
 
-      <ion-list>
-        <ion-item  *ngFor="let f of filters; let i=index">
-          <ion-label>{{f.name}}</ion-label>
-          <ion-toggle [(ngModel)]="filters[i]['state']" (ionChange)="notifyFilterChange(i)"></ion-toggle>
-        </ion-item>
+        <ion-list>
+          <ion-item *ngFor="let f of filters; let i=index">
+            <ion-label>{{f.name}}</ion-label>
+            <ion-toggle color="orange" [(ngModel)]="filters[i]['state']" (ionChange)="notifyFilterChange(i)"></ion-toggle>
+          </ion-item>
+        </ion-list>
 
-      </ion-list>
-
-      <a href="#">Friends</a>
+        <h4>Friends</h4>
+      </div>
     </div>
   </div>
 
   <div #rightInfoPanel id="rightInfoPanel" class="overlay right">
-    <a class="closebtn left" (click)="closeTowerPanel()" >&times;</a>
+    <a class="closebtn left" (click)="closeTowerPanel()">&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
       <tower-detail [data]="selectedTower"></tower-detail>
