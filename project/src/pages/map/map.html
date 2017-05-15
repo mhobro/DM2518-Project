@@ -33,4 +33,12 @@
       <a href="#">Friends</a>
     </div>
   </div>
+
+  <div #rightInfoPanel id="rightInfoPanel" class="overlay right">
+    <a class="closebtn left" (click)="closeTowerPanel()" >&times;</a>
+    <!-- Overlay content -->
+    <div class="overlay-content">
+      <tower-detail [tower]="selectedTower"></tower-detail>
+    </div>
+  </div>
 </ion-content>

@@ -14,6 +14,7 @@ import { HomePage } from '../pages/home/home';
 import { MapPage } from '../pages/map/map';
 import { LoginPage } from '../pages/login/login';
 import { AddMarkerComponent } from '../pages/map/addMarker';
+import {TowerInfoComponent} from "../pages/map/tower_info";
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -39,7 +40,8 @@ const firebase_config = {
     HomePage,
     MapPage,
     LoginPage,
-    AddMarkerComponent
+    AddMarkerComponent,
+    TowerInfoComponent
   ],
   imports: [
     BrowserModule,
@@ -64,7 +66,8 @@ const firebase_config = {
     AuthService,
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    {provide: TowerInfoComponent, useClass: TowerInfoComponent}
   ]
 })
 export class AppModule {}

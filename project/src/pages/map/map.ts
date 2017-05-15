@@ -24,6 +24,7 @@ export class MapPage {
   @ViewChild('map') mapElement: ElementRef; // Ref to the container of the map in the HTML
   @ViewChild('menuLeft') menuLeft: ElementRef; // Ref to the container of the left menu in the HTML
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
+  @ViewChild('rightInfoPanel') towerInfoPanel: ElementRef; // Ref to the tower info panel of the right in the HTML
 
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
@@ -31,7 +32,7 @@ export class MapPage {
 
   addPIControl; // Button to add a PI
   rightMenuControl; // Button to open the right menu
-
+  selectedTower: any;
 
   // Define the list of type of PIs
   readonly filters: Array<{ name: string, type: string, state: boolean }> = [
@@ -229,7 +230,7 @@ export class MapPage {
 
         let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
         var tower = new Tower(key, name, new google.maps.LatLng(lat, lng), marker,
-          undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster);
+          undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster, this);
 
         // Add the tower to the map of markers
         this.towers.set(key, tower);
@@ -271,6 +272,14 @@ export class MapPage {
   }
 
 
+  public displayTowerInfo(key: string) {
+    if (this.towers.has(key)) {
+      var t = this.towers.get(key);
+      this.selectedTower = {name: t.name, key: t.key};
+      this.openTowerPanel();
+    }
+  }
+
   /*************************************************
    ******************* MENUS ***********************
    *************************************************/
@@ -304,6 +313,15 @@ export class MapPage {
 
   public closeRightMenu(): void {
     this.menuRight.nativeElement.style.width = "0%";
+  }
+
+  public closeTowerPanel(): void {
+    this.towerInfoPanel.nativeElement.style.width = "0%";
+    this.selectedTower = null;
+  }
+
+  public openTowerPanel(): void {
+    this.towerInfoPanel.nativeElement.style.width = "75%";
   }
 
 

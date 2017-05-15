@@ -3,6 +3,7 @@ import * as map_style from './map_style'; // File containin all the style for th
 import * as firebase from 'firebase/app';
 
 import {AngularFireDatabase} from 'angularfire2/database';
+import {MapPage} from "./map";
 
 /**
  * [Tower] Class representing a Tower on the map
@@ -25,7 +26,8 @@ export class Tower {
               public db: AngularFireDatabase,
               public user_uid: string,
               public user_locationObs,
-              public marker_cluster) {
+              public marker_cluster,
+              public mapComponent: MapPage) {
 
     // Subscribe to the user's location update
     this.user_locationObs.subscribe((data) => {
@@ -54,6 +56,8 @@ export class Tower {
       this.infoWindow.close();
       this.infoWindow.setContent(contentToDisplay);
       this.infoWindow.open(this.map, this.marker);
+
+      this.mapComponent.displayTowerInfo(this.key);
     }
 
     this.marker.addListener('click', this.onclickListener);
