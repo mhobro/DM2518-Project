@@ -6,7 +6,7 @@ const icons = {
   tower_locked: {
     icon: {
       url: 'tower_locked.svg',
-      scaledSize: new google.maps.Size(42, 70)
+      scaledSize: new google.maps.Size(32, 50)
     }
   },
   tower_unlocked: {

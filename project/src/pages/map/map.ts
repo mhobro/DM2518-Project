@@ -227,13 +227,14 @@ export class MapPage {
         // Fetch the tower information
         let key = towerSnapshot.key;
         let name = towerSnapshot.child('name').val();
+        let caption = towerSnapshot.child('caption').val();
         let img = towerSnapshot.child('img').val();
         let info = towerSnapshot.child('info').val();
         let lat = towerSnapshot.child('lat').val();
         let lng = towerSnapshot.child('lng').val();
 
         let marker = this.createMarker(lat, lng, false); // Don't display the tower until fetching the state for the authenticated user
-        var tower = new Tower(key, name, img, info, new google.maps.LatLng(lat, lng), marker,
+        var tower = new Tower(key, name, caption, img, info, new google.maps.LatLng(lat, lng), marker,
           undefined, this.infoWindow, this.map, this.pis, this.db, this.aut.getUser.uid, this.user_location, this.markerCluster, this);
 
         // Add the tower to the map of markers

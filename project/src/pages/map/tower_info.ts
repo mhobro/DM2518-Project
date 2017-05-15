@@ -13,6 +13,7 @@ import {Tower} from './tower';
       <div *ngIf="data.tower.activated">
         <div style="margin: 20px auto;">
           <img width="200" src="{{data.tower.img}}"/>
+          <p><label>{{data.tower.caption}}</label></p>
         </div>
         <div id="towerTitle">
           <h1>{{data.tower.name}}</h1>

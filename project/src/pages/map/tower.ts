@@ -17,6 +17,7 @@ export class Tower {
 
   constructor(public key: string,
               public name: string,
+              public caption: string,
               public img:string,
               public info:string,
               public location: google.maps.LatLng,
@@ -83,6 +84,7 @@ export class Tower {
     let content = document.createElement('div');
     //content.innerHTML += "<p>Key : " + this.key + "</p>";
     content.innerHTML += "<h1>- " + this.name + " -</h1>";
+    content.innerHTML += "<p> " + this.caption + " </p>";
     content.innerHTML += "<img src="+ this.img +" style='width:200px;'>";
     //content.innerHTML += "<p>Activated : " + this.activated + "</p>";
     content.innerHTML += "<p style='width:200px; fontsize:19px;'><strong>" +this.info+"</strong></p>";
