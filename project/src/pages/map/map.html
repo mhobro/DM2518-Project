@@ -30,22 +30,22 @@
 
       </ion-list>
 
-      <a href="#">Friends</a>
-      <!--<button ion-button round (click)="getUsers()" type="submit">Display users</button>-->
-      <ion-searchbar (ionInput)="searchUser($event)" placeholder="Search for users"></ion-searchbar>
-      <ion-list>
-        <ion-item  *ngFor="let f of usersFiltered; let i=index">
-          <ion-label>{{f}}</ion-label>
-          <ion-toggle  (ionChange)="notifyFollowChange(i)"></ion-toggle>
-        </ion-item>
-      </ion-list>
-
-      <a href="#">You are following</a>
+      <a href="#">Your Friends</a>
       <ion-list>
         <ion-item  *ngFor="let f of following; let i=index">
           <ion-label>{{f.name}}</ion-label>
         </ion-item>
 
+      </ion-list>
+
+      <a href="#">All users</a>
+      <!--<button ion-button round (click)="getUsers()" type="submit">Display users</button>-->
+      <ion-searchbar (ionInput)="searchUser($event)" placeholder="Search for users"></ion-searchbar>
+      <ion-list>
+        <ion-item  *ngFor="let f of usersFiltered; let i=index">
+          <ion-label>{{f.name}}</ion-label>
+          <ion-toggle [(ngModel)]="usersFiltered[i]['following']" (ionChange)="notifyFollowChange(i)"></ion-toggle>
+        </ion-item>
       </ion-list>
 
     </div>

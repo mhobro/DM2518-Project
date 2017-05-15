@@ -27,7 +27,7 @@ export class MapPage {
   @ViewChild('menuRight') menuRight: ElementRef; // Ref to the container of the right in the HTML
 
   following = new Array();
-  usersFiltered : string[];
+  usersFiltered = new Array<{id: string, name: string, email: string, following: boolean}>();
   usersInitial : string[];
   users = new Array<{id: string, name: string, email: string, following: boolean}>();
   followString: string = '';
@@ -407,6 +407,7 @@ export class MapPage {
 
    //Adds a user as followed in firebase and also locally in the following array
    public followUser(friendId, index) : void {
+     console.log("FOLLOWING");
      var uid = this.aut.getUser.uid;
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
      var friendRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
@@ -414,17 +415,17 @@ export class MapPage {
        dbRef.child(friendId);
        friendRef.once('value').then((snap) => {
          if(!snap.exists()){
-           friendRef.child('name').set(this.users[index].name);
-           friendRef.child('email').set(this.users[index].email);
+           friendRef.child('name').set(this.usersFiltered[index].name);
+           friendRef.child('email').set(this.usersFiltered[index].email);
          }
-         this.following.push({"id" : this.users[index].id, "name" : this.users[index].name});
+         this.following.push({"id" : this.usersFiltered[index].id, "name" : this.usersFiltered[index].name});
        });
        this.users.forEach((user) => {
          if (user.id === friendId) {
            user.following = true;
-           console.log(this.users);
          }
        });
+       console.log(this.users);
      });
     this.pis.forEach((pi, key, map) => {
       this.markerCluster.removeMarker(pi.marker, false);
@@ -449,6 +450,12 @@ export class MapPage {
          }
        }
      }
+     this.users.forEach((user) => {
+       if (user.id === friendId) {
+         user.following = false;
+       }
+     });
+     console.log(this.users);
      this.pis.forEach((pi, key, map) => {
        this.markerCluster.removeMarker(pi.marker, false);
        if (this.isFollowing(pi.owner)) {
@@ -493,7 +500,7 @@ export class MapPage {
            followRef.once('value').then((snap) => {
              snap.forEach((snap2) => {
                flw.push({"id" : snap2.key, "name" : snap2.child("name").val()});
-               console.log(snap2.key);
+               //console.log(snap2.key);
              });
            });
          }
@@ -501,8 +508,8 @@ export class MapPage {
      });
      this.following = flw;
      this.users = x;
-     this.usersFiltered = uFilt;
-     this.usersInitial = uFilt;
+     //this.usersFiltered = uFilt;
+     //this.usersInitial = uFilt;
    }
 
    //Called when a person is followed/unfollowed and will handle that event
@@ -515,15 +522,31 @@ export class MapPage {
      followingRef.once('value').then((snapshot) => {
        if (!snapshot.exists()) {
          userRef.child('following').set("null");
-         followingRef.child(friendId).set(this.users[index].email);
-       }else{
+         followingRef.child(friendId).set(this.usersFiltered[index].email);
+         this.following.push({"id" : this.usersFiltered[index].id, "name" : this.usersFiltered[index].name});
+         console.log(this.following);
+         this.users.forEach((user) => {
+           if (user.id === friendId) {
+             user.following = true;
+           }
+         });
+         this.usersFiltered = this.users;
+         this.pis.forEach((pi, key, map) => {
+           this.markerCluster.removeMarker(pi.marker, false);
+           if (this.isFollowing(pi.owner)) {
+             if (pi.mustBeDisplayed()) {
+               this.markerCluster.addMarker(pi.marker, false);
+             }
+           }
+         });
+       } else {
          var checkIfFollowRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
          checkIfFollowRef.once('value').then((friendSnapshot) => {
            if (!friendSnapshot.exists()) {
-             console.log("Adding to follow");
+             //console.log("Adding to follow");
              this.followUser(friendId, index);
            }else{
-             console.log("Removing from follow");
+             //console.log("Removing from follow");
              this.unFollowUser(friendId, index);
            }
          });
@@ -532,14 +555,14 @@ export class MapPage {
     }
 
     public searchUser(ev: any){
-      this.usersFiltered = this.usersInitial;
-      console.log(this.usersFiltered);
-      console.log(this.usersInitial);
+      this.usersFiltered = this.users;
+      //console.log(this.usersFiltered);
+      //console.log(this.usersInitial);
       let val = ev.target.value;
       // if the value is an empty string don't filter the items
       if (val && val.trim() != '' ) {
         this.usersFiltered = this.usersFiltered.filter((item) => {
-          return (item.toLowerCase().indexOf(val.toLowerCase()) > -1);
+          return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
         })
       }
 
