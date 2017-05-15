@@ -57,7 +57,16 @@ export class Tower {
       this.infoWindow.setContent(contentToDisplay);
       this.infoWindow.open(this.map, this.marker);
 
-      this.mapComponent.displayTowerInfo(this.key);
+      let unlockable = false;
+      let reason = "";
+      if (this.userLocation == null) {
+        reason = "Your current position is unknown !";
+      } else if (Utils.calcDistance(this.marker.getPosition(), this.userLocation) > Tower.MAX_UNLOCK_DST) {
+        reason = "You too far to unlock this tower !";
+      } else {
+        unlockable = true;
+      }
+      this.mapComponent.displayTowerInfo(this.key, unlockable, reason);
     }
 
     this.marker.addListener('click', this.onclickListener);
@@ -215,7 +224,7 @@ export class Tower {
    * @param newState
    * @returns {firebase.Promise<any>}
    */
-  private updateStateInDb(newState): firebase.Promise<any> {
+  public updateStateInDb(newState): firebase.Promise<any> {
     var userRef = this.db.database.ref('users/' + this.user_uid + '/towers');
     return userRef.child(this.key).set(newState);
   }

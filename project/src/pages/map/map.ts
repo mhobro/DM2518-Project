@@ -32,7 +32,7 @@ export class MapPage {
 
   addPIControl; // Button to add a PI
   rightMenuControl; // Button to open the right menu
-  selectedTower: any;
+  selectedTower: any = null; // The tower displayed in the tower info panel
 
   // Define the list of type of PIs
   readonly filters: Array<{ name: string, type: string, state: boolean }> = [
@@ -272,10 +272,10 @@ export class MapPage {
   }
 
 
-  public displayTowerInfo(key: string) {
+  public displayTowerInfo(key: string, unlockable: boolean, reason: string) {
     if (this.towers.has(key)) {
       var t = this.towers.get(key);
-      this.selectedTower = {name: t.name, key: t.key};
+      this.selectedTower = {tower: t, unlockable: unlockable, reason: reason};
       this.openTowerPanel();
     }
   }
@@ -300,10 +300,12 @@ export class MapPage {
     });
     this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(this.rightMenuControl);
 
-    // Add click handler on the map to close the menu
+    // Add click handler on the map to close the menus and the infowindow
     this.map.addListener('click', () => {
       this.closeLeftMenu();
       this.closeRightMenu();
+      this.closeTowerPanel();
+      this.infoWindow.close();
     });
   }
 
