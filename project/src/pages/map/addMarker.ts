@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {NavController, ToastController} from 'ionic-angular';
 
 import {AngularFireDatabase} from 'angularfire2/database';
 import {AuthService} from '../../providers/authentication.service';
@@ -21,7 +21,8 @@ export class AddMarkerComponent {
   constructor (public navCtrl: NavController,
                public db: AngularFireDatabase,
                public mapComponent: MapPage,
-               public aut: AuthService) {
+               public aut: AuthService,
+               private toastCtrl: ToastController) {
     this.filters = this.mapComponent.filters; // Filters defined in the map component
     this.model = {name: "", type: this.filters[0].type, description: ""}; //Bound to the input in the form
   }
@@ -104,7 +105,12 @@ export class AddMarkerComponent {
     var description = piInfo.description;
     var type = piInfo.type;
 
-    console.log(piInfo);
+    //console.log(piInfo);
+    var toast = this.toastCtrl.create({
+      duration: 3000,
+      position: 'top'
+    });
+
     newMarkerRef.set(
       {
         'lat': lat,
@@ -120,13 +126,13 @@ export class AddMarkerComponent {
       let userRef = this.db.database.ref('users/' + owner);
       userRef.child('pis').child(key).set(true);
 
+      toast.setMessage('New PI "' + name + '" added successfully');
+      toast.present();
+
     }).catch(function () {
       // Display the error
-      this.alertCtrl.create({
-        title: 'Marker not added',
-        subTitle: 'An error occured while adding the marker in the database.',
-        buttons: ['OK']
-      }).present();
+      toast.setMessage('An error occured while adding the new PI in the database.');
+      toast.present();
     });
 
     // Enable the  add marker button

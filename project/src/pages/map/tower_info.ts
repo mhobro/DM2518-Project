@@ -1,10 +1,12 @@
 import {Component, Input} from '@angular/core';
+import {ToastController} from 'ionic-angular';
 
-import { Tower } from './tower';
+import {Tower} from './tower';
 
 @Component({
   selector: 'tower-detail',
-  template: `<div *ngIf="data">
+  template: `
+    <div *ngIf="data">
       <ion-toolbar>
         <ion-title><h2>Tower</h2></ion-title>
       </ion-toolbar>
@@ -14,13 +16,15 @@ import { Tower } from './tower';
           <p><label>Congratulation !</label></p>
           <p><label>You unlocked the area {{data.tower.name}}.</label></p>
         </div>
-      </div>      
+      </div>
       <div *ngIf="!data.tower.activated">
         <label>Visit the tower to unlock the area.</label>
         <div>
           <h1>{{data.tower.name}}</h1>
         </div>
-        <button ion-button round block class="btn btn-success" (click)="unlockTower();" [disabled]="!data.unlockable">Unlock</button>
+        <button ion-button round block class="btn btn-success" (click)="unlockTower();" [disabled]="!data.unlockable">
+          Unlock
+        </button>
         <div *ngIf="!data.unlockable">
           <label>{{data.reason}}</label>
         </div>
@@ -29,13 +33,24 @@ import { Tower } from './tower';
 })
 
 export class TowerInfoComponent {
-  @Input() data: {tower: Tower, unlockable: boolean, reason: string};
+  @Input() data: { tower: Tower, unlockable: boolean, reason: string };
+
+  constructor(private toastCtrl: ToastController) {
+  };
 
   public unlockTower(): void {
     if (this.data != null && this.data.tower != null) {
+      //Display a confirmation/error toast
+      var toast = this.toastCtrl.create({
+        duration: 3000,
+        position: 'top'
+      });
       this.data.tower.updateStateInDb(true).then(() => {
+        toast.setMessage('Tower "' + this.data.tower.name + '" unlocked successfully !');
+        toast.present();
       }).catch(function (error) {
-        console.log("Error while unlocking the tower: " + error.message)
+        toast.setMessage("Error while unlocking the tower: " + error.message);
+        toast.present();
       });
     }
   }

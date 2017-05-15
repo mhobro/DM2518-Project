@@ -1,5 +1,5 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
-import {AlertController, MenuController} from 'ionic-angular';
+import {AlertController, MenuController, ToastController} from 'ionic-angular';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {Geolocation} from '@ionic-native/geolocation';
 
@@ -53,7 +53,8 @@ export class MapPage {
               private db: AngularFireDatabase,
               private geolocation: Geolocation,
               private alertCtrl: AlertController,
-              private aut: AuthService) {
+              private aut: AuthService,
+              public toastCtrl: ToastController) {
     this.header_data = {titlePage: "Map", isMenu: true};
   }
 
@@ -185,7 +186,7 @@ export class MapPage {
         });
       }
 
-      console.log(type);
+      //console.log(type);
       if (newPI.mustBeDisplayed()) {
         // Add the marker to the cluster = display the marker on the map
         this.markerCluster.addMarker(marker, false);
@@ -279,6 +280,8 @@ export class MapPage {
     if (this.towers.has(key)) {
       var t = this.towers.get(key);
       this.selectedTower = {tower: t, unlockable: unlockable, reason: reason};
+      this.closeLeftMenu();
+      this.closeRightMenu();
       this.openTowerPanel();
     }
   }
@@ -290,34 +293,46 @@ export class MapPage {
   private initMenus(): void {
     // Create a button to open the left menu
     this.addPIControl = Utils.createIconButton("add", () => {
-      this.menuRight.nativeElement.style.width = "0%";
-      this.menuLeft.nativeElement.style.width = "75%";
+      this.closeEveryWindows();
+      this.openLeftMenu();
     });
     this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(this.addPIControl);
 
 
     // Create a button to open the rigth menu
     this.rightMenuControl = Utils.createIconButton("menu", () => {
-      this.menuLeft.nativeElement.style.width = "0%";
-      this.menuRight.nativeElement.style.width = "75%";
+      this.closeEveryWindows();
+      this.openRigthMenu();
     });
     this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(this.rightMenuControl);
 
     // Add click handler on the map to close the menus and the infowindow
     this.map.addListener('click', () => {
-      this.closeLeftMenu();
-      this.closeRightMenu();
-      this.closeTowerPanel();
-      this.infoWindow.close();
+      this.closeEveryWindows();
     });
+  }
+
+  public closeEveryWindows() {
+    this.closeLeftMenu();
+    this.closeRightMenu();
+    this.closeTowerPanel();
+    this.infoWindow.close();
   }
 
   public closeLeftMenu(): void {
     this.menuLeft.nativeElement.style.width = "0%";
   }
 
+  public openLeftMenu(): void {
+    this.menuLeft.nativeElement.style.width = "75%";
+  }
+
   public closeRightMenu(): void {
     this.menuRight.nativeElement.style.width = "0%";
+  }
+
+  public openRigthMenu(): void {
+    this.menuRight.nativeElement.style.width = "75%";
   }
 
   public closeTowerPanel(): void {
