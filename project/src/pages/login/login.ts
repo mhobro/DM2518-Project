@@ -7,6 +7,7 @@ import {AuthService} from '../../providers/authentication.service';
 
 // Do not import from 'firebase' as you'll lose the tree shaking benefits
 import * as firebase from 'firebase/app';
+import {MapPage} from "../map/map";
 
 
 /*
@@ -84,17 +85,22 @@ export class LoginPage {
         // TODO => clean the data with the previous uid
         var ref = firebase.database().ref("users/" + user.uid);
         ref.once("value")
-          .then(function(snapshot) {
+          .then((snapshot) => {
             if (!snapshot.exists()) {
               ref.child('name').set(user.displayName);
               ref.child('email').set(user.email);
             }
+
+            // Go back to HomePage
+            this._auth.invokeEvent.subscribe((value) => {
+              if (value['connected']) {
+                this.navCtrl.setRoot(MapPage);
+              }
+            });
+
           });
 
         //console.log("Logged in successfully");
-
-        // Go back to HomePage
-        this.navCtrl.popToRoot();
       }
     });
   }

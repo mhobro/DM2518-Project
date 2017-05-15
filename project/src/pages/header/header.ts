@@ -18,7 +18,7 @@ export class Header implements OnInit {
   constructor(public navCtrl: NavController, public _auth: AuthService) {
     this._auth.invokeEvent.subscribe((value) => {
       if (value['logout']) {
-        this.navCtrl.setRoot(HomePage);
+        this.navCtrl.setRoot(LoginPage);
       }
     });
   }

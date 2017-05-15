@@ -1,5 +1,5 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
-import {NavController, AlertController} from 'ionic-angular';
+import {AlertController, MenuController} from 'ionic-angular';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {Geolocation} from '@ionic-native/geolocation';
 
@@ -49,16 +49,17 @@ export class MapPage {
   user_location; // The Observable object watching the user location
   markerCluster; // The object containing all the marker on the map grouped by cluster
 
-  constructor(public navCtrl: NavController,
-              public db: AngularFireDatabase,
-              public geolocation: Geolocation,
-              public alertCtrl: AlertController,
-              public aut: AuthService) {
+  constructor(private menu: MenuController,
+              private db: AngularFireDatabase,
+              private geolocation: Geolocation,
+              private alertCtrl: AlertController,
+              private aut: AuthService) {
     this.header_data = {titlePage: "Map", isMenu: true};
   }
 
   // Called when the view is fully loaded
   ionViewDidLoad() {
+    this.menu.swipeEnable(false); // Disable the swipe gesture to open the navbar menu
     this.loadMap();
   }
 

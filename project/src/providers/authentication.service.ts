@@ -28,6 +28,8 @@ export class AuthService {
 
       if (!this.wasConnected && this.currentUser != null) {
         this.wasConnected = true;
+        console.log("connected");
+        this.invokeEvent.next({connected: true}); // Tell the component that logout is done => nav to home
       }
 
       if (this.wasConnected && this.currentUser == null) {

@@ -5,6 +5,8 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 
 import {HomePage} from '../pages/home/home';
 import {MapPage} from '../pages/map/map';
+import {AuthService} from "../providers/authentication.service";
+import {LoginPage} from "../pages/login/login";
 
 @Component({
   templateUrl: 'app.html',
@@ -19,7 +21,8 @@ export class MyApp {
   constructor(public platform: Platform,
               public menu: MenuController,
               public statusBar: StatusBar,
-              public splashScreen: SplashScreen) {
+              public splashScreen: SplashScreen,
+              public auth: AuthService) {
 
     this.initializeApp();
 
@@ -36,7 +39,14 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
-      this.nav.setRoot(this.rootPage);
+
+      this.auth.invokeEvent.subscribe((value) => {
+        if (value['connected']) {
+          this.nav.setRoot(MapPage);
+        }
+      });
+
+      this.nav.setRoot(LoginPage);
     });
   }
 
