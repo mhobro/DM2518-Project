@@ -34,9 +34,9 @@
       <!--<button ion-button round (click)="getUsers()" type="submit">Display users</button>-->
       <ion-searchbar (ionInput)="searchUser($event)" placeholder="Search for users"></ion-searchbar>
       <ion-list>
-        <ion-item  *ngFor="let f of users; let i=index">
-          <ion-label>{{f.name}}</ion-label>
-          <ion-toggle [(ngModel)]="users[i]['following']" (ionChange)="notifyFollowChange(i)"></ion-toggle>
+        <ion-item  *ngFor="let f of usersFiltered; let i=index">
+          <ion-label>{{f}}</ion-label>
+          <ion-toggle  (ionChange)="notifyFollowChange(i)"></ion-toggle>
         </ion-item>
       </ion-list>
 

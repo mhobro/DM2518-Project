@@ -29,7 +29,7 @@ export class MapPage {
   following = new Array();
   usersFiltered : string[];
   usersInitial : string[];
-  users = new Array();
+  users = new Array<{id: string, name: string, email: string, following: boolean}>();
   followString: string = '';
   map: any; // Ref to the Google Map object
   towers: Map<string, any> = new Map(); // Map associating the tower's name to the tower's object
@@ -411,20 +411,20 @@ export class MapPage {
      var dbRef = this.db.database.ref('users/' + uid + '/following/');
      var friendRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
      dbRef.once('value').then((snapshot) => {
-       this.following.push({"id" : snapshot.key, "name" : snapshot.name});
        dbRef.child(friendId);
        friendRef.once('value').then((snap) => {
          if(!snap.exists()){
            friendRef.child('name').set(this.users[index].name);
            friendRef.child('email').set(this.users[index].email);
          }
+         this.following.push({"id" : this.users[index].id, "name" : this.users[index].name});
        });
        this.users.forEach((user) => {
          if (user.id === friendId) {
            user.following = true;
            console.log(this.users);
          }
-       })
+       });
      });
     this.pis.forEach((pi, key, map) => {
       this.markerCluster.removeMarker(pi.marker, false);
@@ -472,7 +472,7 @@ export class MapPage {
          let key = userSnapshot.key;
          let email = userSnapshot.child('email').val();
          let name = userSnapshot.child('name').val();
-         let flwing = userSnapshot.child('following').val();
+         //let flwing = userSnapshot.child('following').val();
 
          if(key !== id){
            followRef.once('value', function (snapshot) {
@@ -482,7 +482,7 @@ export class MapPage {
                "id": key,
                "email": email,
                "name": name,
-               "following": flwing
+               "following": snapshot.child(key).exists()
              });
            });
 
@@ -491,8 +491,9 @@ export class MapPage {
            }
          }else{
            followRef.once('value').then((snap) => {
-             snapshot.forEach((snap2) => {
-               flw.push({"id" : snap2.key, "name" : snap2.child("name").val()})
+             snap.forEach((snap2) => {
+               flw.push({"id" : snap2.key, "name" : snap2.child("name").val()});
+               console.log(snap2.key);
              });
            });
          }
@@ -507,7 +508,6 @@ export class MapPage {
    //Called when a person is followed/unfollowed and will handle that event
    //Removing/adding the person from the following array
    public notifyFollowChange(index) : void {
-     console.log("notifyfollow");
      var uid = this.aut.getUser.uid;
      var friendId = this.users[index].id;
      var followingRef = this.db.database.ref('users/' + uid + '/following');
@@ -520,8 +520,10 @@ export class MapPage {
          var checkIfFollowRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
          checkIfFollowRef.once('value').then((friendSnapshot) => {
            if (!friendSnapshot.exists()) {
+             console.log("Adding to follow");
              this.followUser(friendId, index);
            }else{
+             console.log("Removing from follow");
              this.unFollowUser(friendId, index);
            }
          });
