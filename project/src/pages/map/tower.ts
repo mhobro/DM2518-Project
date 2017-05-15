@@ -17,6 +17,8 @@ export class Tower {
 
   constructor(public key: string,
               public name: string,
+              public img:string,
+              public info:string,
               public location: google.maps.LatLng,
               public marker: google.maps.Marker,
               public activated: boolean = false,
@@ -79,11 +81,13 @@ export class Tower {
    */
   public getHTMLDebug() {
     let content = document.createElement('div');
-    content.innerHTML += "<p>Key : " + this.key + "</p>";
-    content.innerHTML += "<p>Name : " + this.name + "</p>";
+    //content.innerHTML += "<p>Key : " + this.key + "</p>";
+    content.innerHTML += "<h1>- " + this.name + " -</h1>";
+    content.innerHTML += "<img src="+ this.img +" style='width:200px;'>";
+    //content.innerHTML += "<p>Activated : " + this.activated + "</p>";
+    content.innerHTML += "<p style='width:200px; fontsize:19px;'><strong>" +this.info+"</strong></p>";
     content.innerHTML += "<p>Lat : " + this.location.lat() + "</p>";
     content.innerHTML += "<p>Lng : " + this.location.lng() + "</p>";
-    content.innerHTML += "<p>Activated : " + this.activated + "</p>";
 
     return content;
   }
@@ -95,6 +99,7 @@ export class Tower {
    */
   public getLockedHTMLContent() {
     let content = document.createElement('div');
+    content.innerHTML += "<h1>- " + this.name + " -</h1>";
     content.innerHTML += "<p><strong>The tower is locked</strong></p>";
 
     let unlockButton = document.createElement('button');
@@ -111,7 +116,7 @@ export class Tower {
       content.innerHTML += "<p><strong>Your current position is unknown !</strong></p>";
       unlockButton.disabled = true;
     } else if (Utils.calcDistance(this.marker.getPosition(), this.userLocation) > Tower.MAX_UNLOCK_DST) {
-      content.innerHTML += "<p><strong>You too far to unlock this tower !</strong></p>";
+      content.innerHTML += "<p><strong>Visit this area to unlock this tower !</strong></p>";
       unlockButton.disabled = true;
     } else {
       unlockButton.onclick = () => {
