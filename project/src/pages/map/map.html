@@ -35,19 +35,39 @@
         <ion-list>
           <ion-item *ngFor="let f of filters; let i=index">
             <ion-label>{{f.name}}</ion-label>
-            <ion-toggle color="orange" [(ngModel)]="filters[i]['state']" (ionChange)="notifyFilterChange(i)"></ion-toggle>
+            <ion-toggle color="orange" [(ngModel)]="filters[i]['state']"
+                        (ionChange)="notifyFilterChange(i)"></ion-toggle>
           </ion-item>
         </ion-list>
 
-        <h4>Friends</h4>
+        <a href="#">Your Friends</a>
+        <ion-list>
+          <ion-item *ngFor="let f of following; let i=index">
+            <ion-label>{{f.name}}</ion-label>
+          </ion-item>
+
+        </ion-list>
+
+        <a href="#">All users</a>
+        <!--<button ion-button round (click)="getUsers()" type="submit">Display users</button>-->
+        <ion-searchbar (ionInput)="searchUser($event)" placeholder="Search for users"></ion-searchbar>
+        <ion-list>
+          <ion-item *ngFor="let f of usersFiltered; let i=index">
+            <ion-label>{{f.name}}</ion-label>
+            <ion-toggle [(ngModel)]="usersFiltered[i]['following']" (ionChange)="notifyFollowChange(i)"></ion-toggle>
+          </ion-item>
+        </ion-list>
       </div>
     </div>
   </div>
 
   <div #rightInfoPanel id="rightInfoPanel" class="overlay right">
-    <a class="closebtn left" (click)="closeTowerPanel()">&times;</a>
     <!-- Overlay content -->
     <div class="overlay-content">
+      <ion-toolbar color="orange">
+        <a class="closebtn left" (click)="closeTowerPanel();">&times;</a>
+        <ion-title><h2>Tower</h2></ion-title>
+      </ion-toolbar>
       <tower-detail [data]="selectedTower"></tower-detail>
     </div>
   </div>

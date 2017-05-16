@@ -7,9 +7,6 @@ import {Tower} from './tower';
   selector: 'tower-detail',
   template: `
     <div *ngIf="data">
-      <ion-toolbar color="orange">
-        <ion-title style="color:white; font-weight: bold;"><h2>Tower</h2></ion-title>
-      </ion-toolbar>
       <div *ngIf="data.tower.activated">
         <div style="margin: 20px auto;">
           <img width="200" src="{{data.tower.img}}"/>

@@ -34,6 +34,12 @@ export class MapPage {
   rightMenuControl; // Button to open the right menu
   selectedTower: any = null; // The tower displayed in the tower info panel
 
+  following = new Array();
+  usersFiltered = new Array<{id: string, name: string, email: string, following: boolean}>();
+  usersInitial : string[];
+  users = new Array<{id: string, name: string, email: string, following: boolean}>();
+  followString: string = '';
+
   // Define the list of type of PIs
   readonly filters: Array<{ name: string, type: string, state: boolean }> = [
     {name: 'Food', type: 'food', state: true},
@@ -56,6 +62,8 @@ export class MapPage {
               private aut: AuthService,
               public toastCtrl: ToastController) {
     this.header_data = {titlePage: "Map", isMenu: true};
+    this.getUsers();
+    console.log(this.users);
   }
 
   // Called when the view is fully loaded
@@ -111,8 +119,10 @@ export class MapPage {
     // Check if each marker must be displayed or not
     this.pis.forEach((pi, key, map) => {
       this.markerCluster.removeMarker(pi.marker, false);
-      if (pi.mustBeDisplayed()) {
-        this.markerCluster.addMarker(pi.marker, false);
+      if (this.isFollowing(pi.owner)) {
+        if (pi.mustBeDisplayed()) {
+          this.markerCluster.addMarker(pi.marker, false);
+        }
       }
     });
   }
@@ -172,18 +182,22 @@ export class MapPage {
       } else {
         marker.setIcon(map_style.getIcon(type));
 
-        // Check if the PI is near an unlocked tower
-        this.towers.forEach((tower, keyTower, map) => {
-          if (tower.isNear(lat, lng)) {
-            tower.piInRange.push(key);
+        //Check if the owner of the PI is a friend
+        if (this.isFollowing(owner)) {
+        //if(true) {
+          // Check if the PI is near an unlocked tower
+          this.towers.forEach((tower, keyTower, map) => {
+            if (tower.isNear(lat, lng)) {
+              tower.piInRange.push(key);
 
-            // If tower already activated => display the PI
-            if (tower.activated) {
-              unlocked = true;
-              newPI.towerNear.push(tower.key);
+              // If tower already activated => display the PI
+              if (tower.activated) {
+                unlocked = true;
+                newPI.towerNear.push(tower.key);
+              }
             }
-          }
-        });
+          });
+        }
       }
 
       //console.log(type);
@@ -345,6 +359,188 @@ export class MapPage {
     this.towerInfoPanel.nativeElement.style.width = "75%";
   }
 
+  /*************************************************
+   **************** FRIENDS ********************
+   *************************************************/
+
+   //Adds a user as followed in firebase and also locally in the following array
+   public followUser(friendId, index) : void {
+     console.log("FOLLOWING");
+     var uid = this.aut.getUser.uid;
+     var dbRef = this.db.database.ref('users/' + uid + '/following/');
+     var friendRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
+     dbRef.once('value').then((snapshot) => {
+       dbRef.child(friendId);
+       friendRef.once('value').then((snap) => {
+         if(!snap.exists()){
+           friendRef.child('name').set(this.usersFiltered[index].name);
+           friendRef.child('email').set(this.usersFiltered[index].email);
+         }
+         this.following.push({"id" : this.usersFiltered[index].id, "name" : this.usersFiltered[index].name});
+       });
+       this.users.forEach((user) => {
+         if (user.id === friendId) {
+           user.following = true;
+         }
+       });
+       console.log(this.users);
+     });
+    this.pis.forEach((pi, key, map) => {
+      this.markerCluster.removeMarker(pi.marker, false);
+      if (this.isFollowing(pi.owner) || pi.owner == this.aut.getUser.uid) {
+        if (pi.mustBeDisplayed()) {
+          this.markerCluster.addMarker(pi.marker, false);
+        }
+      }
+    });
+   }
+
+   //Removes the user as followed in firebase and also removes it locally from
+   //the following array
+   public unFollowUser(friendId, index) : void {
+     var uid = this.aut.getUser.uid;
+     var dbRef = this.db.database.ref('users/' + uid + '/following/');
+     dbRef.child(friendId).remove();
+     for(var i = 0; i < this.following.length; i++){
+       if(this.following[i].id == friendId){
+         if (index > -1) {
+          this.following.splice(i, 1);
+         }
+       }
+     }
+     this.users.forEach((user) => {
+       if (user.id === friendId) {
+         user.following = false;
+       }
+     });
+     console.log(this.users);
+     this.pis.forEach((pi, key, map) => {
+       this.markerCluster.removeMarker(pi.marker, false);
+       if (this.isFollowing(pi.owner) || pi.owner == this.aut.getUser.uid) {
+         if (pi.mustBeDisplayed()) {
+           this.markerCluster.addMarker(pi.marker, false);
+         }
+       }
+     });
+   }
+
+   //Fetches all users to the users array
+   public getUsers() {
+     var x = new Array();
+     var flw = new Array();
+     var uFilt = new Array();
+     var dbref = this.db.database.ref('users/');
+     var followRef = this.db.database.ref('users/' + this.aut.getUser.uid + '/following/');
+     dbref.once('value').then((snapshot) => {
+       snapshot.forEach((userSnapshot) => {
+         var id = this.aut.getUser.uid;
+         let key = userSnapshot.key;
+         let email = userSnapshot.child('email').val();
+         let name = userSnapshot.child('name').val();
+         //let flwing = userSnapshot.child('following').val();
+
+         if(key !== id){
+           followRef.once('value', function (snapshot) {
+             //console.log(snapshot.child(key).exists());
+             //console.log(key);
+             x.push({
+               "id": key,
+               "email": email,
+               "name": name,
+               "following": snapshot.child(key).exists()
+             });
+           });
+
+           if(name != null){
+              uFilt.push(name);
+           }
+         }else{
+           followRef.once('value').then((snap) => {
+             snap.forEach((snap2) => {
+               flw.push({"id" : snap2.key, "name" : snap2.child("name").val()});
+               //console.log(snap2.key);
+             });
+           });
+         }
+       });
+     });
+     this.following = flw;
+     this.users = x;
+     //this.usersFiltered = uFilt;
+     //this.usersInitial = uFilt;
+   }
+
+   //Called when a person is followed/unfollowed and will handle that event
+   //Removing/adding the person from the following array
+   public notifyFollowChange(index) : void {
+     var i = -1;
+     this.users.forEach((v, k, m) => {
+       if (this.usersFiltered[index].id === v.id) {
+         i = k;
+       }
+     });
+
+     var uid = this.aut.getUser.uid;
+     var friendId = this.users[i].id;
+     var followingRef = this.db.database.ref('users/' + uid + '/following');
+     var userRef = this.db.database.ref('users/' + uid);
+     followingRef.once('value').then((snapshot) => {
+       if (!snapshot.exists()) {
+         userRef.child('following').set("null");
+         followingRef.child(friendId).set(this.usersFiltered[index].email);
+         this.following.push({"id" : this.usersFiltered[index].id, "name" : this.usersFiltered[index].name});
+         console.log(this.following);
+         this.users.forEach((user) => {
+           if (user.id === friendId) {
+             user.following = true;
+           }
+         });
+         this.usersFiltered = this.users;
+         this.pis.forEach((pi, key, map) => {
+           this.markerCluster.removeMarker(pi.marker, false);
+           if (this.isFollowing(pi.owner) || pi.owner == this.aut.getUser.uid) {
+             if (pi.mustBeDisplayed()) {
+               this.markerCluster.addMarker(pi.marker, false);
+             }
+           }
+         });
+       } else {
+         var checkIfFollowRef = this.db.database.ref('users/' + uid + '/following/' + friendId);
+         checkIfFollowRef.once('value').then((friendSnapshot) => {
+           if (!friendSnapshot.exists()) {
+             //console.log("Adding to follow");
+             this.followUser(friendId, index);
+           }else{
+             //console.log("Removing from follow");
+             this.unFollowUser(friendId, index);
+           }
+         });
+       }
+     });
+    }
+
+    public searchUser(ev: any){
+      this.usersFiltered = this.users;
+      //console.log(this.usersFiltered);
+      //console.log(this.usersInitial);
+      let val = ev.target.value;
+      // if the value is an empty string don't filter the items
+      if (val && val.trim() != '' ) {
+        this.usersFiltered = this.usersFiltered.filter((item) => {
+          return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        })
+      }
+
+    }
+
+    private isFollowing(friend): boolean {
+      for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].id === friend) {
+          return this.users[i].following;
+        }
+      }
+      return false;
+    }
 
   /*************************************************
    **************** GEOLOCATION ********************
